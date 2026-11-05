@@ -1,0 +1,132 @@
+/* ==========================================================================
+   Components (§12)
+   ========================================================================== */
+
+/* ---- Button ------------------------------------------------------------ */
+.btn {
+  --_h: 48px; --_px: 24px;
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  height: var(--_h); padding-inline: var(--_px);
+  font-family: var(--font-body); font-size: 14px; font-weight: 600; line-height: 1;
+  letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+  border: 1px solid transparent; border-radius: 0;
+  transition: background-color var(--dur-sm) var(--ease-out), color var(--dur-sm), border-color var(--dur-sm), transform var(--dur-sm) var(--ease-out);
+}
+.btn--sm { --_h: 40px; --_px: 18px; font-size: 13px; }
+.btn--lg { --_h: 56px; --_px: 28px; }
+.btn--block { width: 100%; }
+.btn__icon { transition: transform var(--dur-sm) var(--ease-out); flex-shrink: 0; }
+.btn--primary { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
+.btn--secondary { background: transparent; border-color: var(--color-input-line); color: var(--color-text-primary); }
+[data-theme="paper"] .btn--primary, [data-theme="lime"] .btn--primary { background: var(--ink-925); border-color: var(--ink-925); color: var(--paper-50); }
+@media (hover: hover) and (pointer: fine) {
+  .btn--primary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); transform: translateY(-2px); }
+  .btn--secondary:hover { border-color: var(--color-accent); color: var(--color-accent); transform: translateY(-2px); }
+  .btn:hover .btn__icon { transform: translate(3px, -3px); }
+}
+.btn:active { transform: translateY(0); }
+.btn:disabled, .btn[aria-disabled="true"] { background: var(--ink-700); border-color: var(--ink-700); color: var(--grey-600); cursor: not-allowed; transform: none; }
+.btn[aria-busy="true"] { cursor: progress; }
+.btn[aria-busy="true"] .btn__icon { display: none; }
+.btn .dots::after { content: ""; display: inline-block; width: 1.4em; text-align: left; animation: dots 1.2s steps(4) infinite; }
+@keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+@media (max-width: 479px) { .hero .btn--lg, .contact-form .btn--lg, .site-footer .btn--lg, .not-found .btn--lg { width: 100%; } }
+
+/* ---- Text link ---------------------------------------------------------- */
+.text-link {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--color-text-secondary); transition: color var(--dur-sm);
+}
+.text-link__label { position: relative; }
+.text-link__label::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: currentColor;
+  transform: scaleX(0); transform-origin: left; transition: transform 300ms var(--ease-out);
+}
+.text-link:hover, .text-link:focus-visible { color: var(--color-accent-text); }
+.text-link:hover .text-link__label::after, .text-link:focus-visible .text-link__label::after { transform: scaleX(1); }
+.text-link .icon { transition: transform var(--dur-sm) var(--ease-out); }
+.text-link:hover .icon { transform: translate(2px, -2px); }
+[data-theme="paper"] .text-link, [data-theme="lime"] .text-link { color: var(--color-text-primary); }
+
+/* ---- Badges & tags ------------------------------------------------------ */
+.badge-dot { display: inline-flex; align-items: center; gap: 12px; color: var(--color-text-muted); letter-spacing: .14em; }
+.badge-dot::before { content: ""; width: 6px; height: 6px; background: var(--color-accent); flex-shrink: 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag {
+  padding: 6px 10px; border: 1px solid var(--color-line-strong);
+  font-family: var(--font-mono); font-size: 11px; line-height: 1.2; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+.format-badge {
+  display: inline-block; padding: 4px 8px; border: 1px solid var(--color-accent);
+  background: rgb(5 5 5 / .6); color: var(--color-accent);
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+}
+
+/* ---- Square controls ---------------------------------------------------- */
+.icon-box {
+  display: grid; place-items: center; width: 48px; height: 48px; flex-shrink: 0;
+  border: 1px solid var(--color-line); color: var(--color-text-primary);
+  transition: background-color var(--dur-sm) var(--ease-out), color var(--dur-sm), border-color var(--dur-sm);
+}
+.icon-box .icon { transition: transform 300ms var(--ease-out); }
+.square-btn {
+  display: grid; place-items: center; width: 52px; height: 52px;
+  border: 1px solid var(--color-line); color: var(--color-text-primary);
+  transition: background-color var(--dur-sm), color var(--dur-sm);
+}
+.square-btn:hover { background: var(--color-text-primary); color: var(--color-bg); }
+.icon-btn { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--color-line); color: var(--color-text-secondary); transition: color var(--dur-sm), border-color var(--dur-sm); }
+.icon-btn:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.icon-btn--missing { border-style: dashed; border-color: var(--color-accent); color: var(--color-accent); opacity: .7; }
+
+/* ---- Form fields (§12.7) ---------------------------------------------- */
+.field { position: relative; display: flex; flex-direction: column; min-width: 0; }
+.field__label {
+  margin-bottom: 10px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--color-text-muted); transition: color var(--dur-xs);
+}
+.req { color: var(--color-accent); }
+.field input:not([type="checkbox"]), .field textarea, .field select {
+  width: 100%; min-height: 52px; padding: 12px 0;
+  background: transparent; border: 0; border-bottom: 1px solid var(--color-input-line); border-radius: 0;
+  font-family: var(--font-body); font-size: 17px; line-height: 1.5; color: var(--color-text-primary);
+  transition: border-color var(--dur-xs), box-shadow var(--dur-xs);
+  -webkit-appearance: none; appearance: none;
+}
+.field textarea { min-height: 132px; resize: vertical; }
+.field ::placeholder { color: var(--color-text-subtle); opacity: 1; }
+.field input:hover, .field textarea:hover, .field select:hover { border-bottom-color: var(--grey-500); }
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-bottom-color: var(--color-accent); box-shadow: inset 0 -1px 0 var(--color-accent); }
+.field:focus-within .field__label { color: var(--color-accent); }
+.field.is-invalid input, .field.is-invalid textarea, .field.is-invalid select { border-bottom-color: var(--color-error); box-shadow: inset 0 -1px 0 var(--color-error); }
+.field.is-valid::after {
+  content: ""; position: absolute; right: 2px; top: 46px; width: 10px; height: 5px;
+  border-left: 1.5px solid var(--color-accent); border-bottom: 1.5px solid var(--color-accent); transform: rotate(-45deg);
+}
+.field--check.is-valid::after, .field:has(select).is-valid::after { display: none; }
+.field__error { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; color: var(--color-error); }
+.field__error[hidden] { display: none; }
+.field__count { position: absolute; right: 0; bottom: -24px; font-family: var(--font-mono); font-size: 12px; color: var(--color-text-subtle); }
+.field--full:has(.field__count) .field__error { margin-right: 80px; }
+
+.select { position: relative; }
+.select select { padding-right: 28px; cursor: pointer; }
+.select select option { background: var(--color-surface-2); color: var(--paper-50); }
+.select__chevron { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--color-text-secondary); }
+
+.check { display: flex; align-items: flex-start; gap: 14px; cursor: pointer; font-size: 15px; color: var(--color-text-secondary); line-height: 1.5; }
+.check input { position: absolute; opacity: 0; width: 18px; height: 18px; margin: 3px 0 0; }
+.check__box { flex-shrink: 0; display: grid; place-items: center; width: 18px; height: 18px; margin-top: 3px; border: 1px solid var(--color-input-line); color: transparent; transition: background-color var(--dur-xs), border-color var(--dur-xs); }
+.check input:checked + .check__box { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-on-accent); }
+.check input:focus-visible + .check__box { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+.check a { color: var(--color-text-primary); text-decoration: underline; text-underline-offset: 3px; }
+.check a:hover { color: var(--color-accent); }
+.field.is-invalid .check__box { border-color: var(--color-error); }
+
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.form-alert { margin-top: var(--space-6); padding: 14px 16px; border: 1px solid var(--color-error); color: var(--color-text-primary); font-size: 15px; }
+.form-alert[hidden] { display: none; }
+.form-alert--info { border-color: var(--color-line-strong); color: var(--color-text-secondary); }

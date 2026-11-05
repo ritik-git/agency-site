@@ -1,0 +1,205 @@
+{
+ "hero-orb": {
+  "widths": [
+   360,
+   560,
+   840,
+   1120
+  ],
+  "w": 1400,
+  "h": 1400
+ },
+ "project-alpha-portrait": {
+  "widths": [
+   480,
+   800,
+   1200
+  ],
+  "w": 1280,
+  "h": 1600
+ },
+ "project-alpha-landscape": {
+  "widths": [
+   480,
+   800,
+   1200,
+   1600
+  ],
+  "w": 1600,
+  "h": 1142
+ },
+ "project-alpha-wide": {
+  "widths": [
+   800,
+   1200,
+   1600
+  ],
+  "w": 1600,
+  "h": 900
+ },
+ "project-alpha-story": {
+  "widths": [
+   480,
+   720
+  ],
+  "w": 900,
+  "h": 1600
+ },
+ "project-beta-portrait": {
+  "widths": [
+   480,
+   800,
+   1200
+  ],
+  "w": 1280,
+  "h": 1600
+ },
+ "project-beta-landscape": {
+  "widths": [
+   480,
+   800,
+   1200,
+   1600
+  ],
+  "w": 1600,
+  "h": 1142
+ },
+ "project-beta-wide": {
+  "widths": [
+   800,
+   1200,
+   1600
+  ],
+  "w": 1600,
+  "h": 900
+ },
+ "project-beta-story": {
+  "widths": [
+   480,
+   720
+  ],
+  "w": 900,
+  "h": 1600
+ },
+ "project-gamma-portrait": {
+  "widths": [
+   480,
+   800,
+   1200
+  ],
+  "w": 1280,
+  "h": 1600
+ },
+ "project-gamma-landscape": {
+  "widths": [
+   480,
+   800,
+   1200,
+   1600
+  ],
+  "w": 1600,
+  "h": 1142
+ },
+ "project-gamma-wide": {
+  "widths": [
+   800,
+   1200,
+   1600
+  ],
+  "w": 1600,
+  "h": 900
+ },
+ "project-gamma-story": {
+  "widths": [
+   480,
+   720
+  ],
+  "w": 900,
+  "h": 1600
+ },
+ "project-delta-portrait": {
+  "widths": [
+   480,
+   800,
+   1200
+  ],
+  "w": 1280,
+  "h": 1600
+ },
+ "project-delta-landscape": {
+  "widths": [
+   480,
+   800,
+   1200,
+   1600
+  ],
+  "w": 1600,
+  "h": 1142
+ },
+ "project-delta-wide": {
+  "widths": [
+   800,
+   1200,
+   1600
+  ],
+  "w": 1600,
+  "h": 900
+ },
+ "project-delta-story": {
+  "widths": [
+   480,
+   720
+  ],
+  "w": 900,
+  "h": 1600
+ },
+ "service-ai": {
+  "widths": [
+   240,
+   480
+  ],
+  "w": 720,
+  "h": 1280
+ },
+ "service-ugc": {
+  "widths": [
+   240,
+   480
+  ],
+  "w": 720,
+  "h": 1280
+ },
+ "service-video": {
+  "widths": [
+   240,
+   480
+  ],
+  "w": 720,
+  "h": 1280
+ },
+ "service-performance": {
+  "widths": [
+   240,
+   480
+  ],
+  "w": 720,
+  "h": 1280
+ },
+ "service-brand": {
+  "widths": [
+   240,
+   480
+  ],
+  "w": 720,
+  "h": 1280
+ },
+ "founder-placeholder": {
+  "widths": [
+   480,
+   800,
+   1200
+  ],
+  "w": 1600,
+  "h": 2000
+ }
+}
