@@ -32,8 +32,10 @@ jobs:
           STRICT: ${{ vars.STRICT }}                     # STRICT=1 fails the build if placeholders remain
           BASE_PATH: ${{ steps.pages.outputs.base_path }}/
           SITE_URL: ${{ vars.SITE_URL || steps.pages.outputs.origin }}
-          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          # Public by design (they ship in every visitor's browser); RLS in supabase/schema.sql protects the data.
+          # Repository variables of the same name override these defaults. Never put the secret key here.
+          SUPABASE_URL: ${{ vars.SUPABASE_URL || 'https://plqqwwdourdbbjqqpqms.supabase.co' }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY || 'sb_publishable_eJq4PtuTBHM-pdxsOxEhuw_xx-FtJEr' }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
