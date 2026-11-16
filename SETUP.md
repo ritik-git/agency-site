@@ -14,8 +14,9 @@ About 15 minutes. You need a GitHub account and a Supabase account.
    ```
 5. **Authentication → Sign In / Providers → Email**: turn **off** "Allow new users to sign up".
    (Not strictly needed — non-admins see nothing — but it keeps the user list clean.)
-6. **Project Settings → API** (or **Data API**): copy the **Project URL** and the **anon / public** key.
-   Never use the `service_role` key in this project.
+6. **Project Settings → API Keys** (or **Data API**): copy the **Project URL** (newer dashboards call it **API URL**)
+   and a public key — either the **publishable** key (`sb_publishable_…`) or the legacy **anon** key (`eyJ…`). Both work.
+   Never use the **secret** / `service_role` key in this project.
 
 > **Already set up the database before the consultation form?** Run `supabase/migrations/002_consultation_form.sql`
 > once in the SQL Editor. It adds phone, revenue, goal and challenge columns. (A fresh `schema.sql` already includes them.)
@@ -35,7 +36,7 @@ About 15 minutes. You need a GitHub account and a Supabase account.
    | Name | Value |
    |---|---|
    | `SUPABASE_URL` | your Project URL, e.g. `https://abcd1234.supabase.co` |
-   | `SUPABASE_ANON_KEY` | your anon/public key |
+   | `SUPABASE_ANON_KEY` | your publishable key (`sb_publishable_…`) or legacy anon key |
 
 4. **Actions** tab → "Deploy to GitHub Pages" → **Run workflow** (it also runs on every push to `main`).
 5. Your site is live at `https://<you>.github.io/agency-site/`, and the lead inbox at `…/agency-site/admin/`.

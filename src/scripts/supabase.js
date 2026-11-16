@@ -14,12 +14,18 @@ class ApiError extends Error {
   }
 }
 
+// Supabase has two kinds of public key: the legacy "anon" key (a JWT, "eyJ…") and the newer
+// "publishable" key ("sb_publishable_…"). Both go in the `apikey` header. Only a JWT may also be sent as
+// the Bearer token; with a publishable key, anonymous requests send no Authorization header at all.
+const KEY_IS_JWT = /^eyJ/.test(SUPABASE_ANON_KEY);
+
 async function request(path, { method = "GET", body, token, headers = {} } = {}) {
+  const bearer = token || (KEY_IS_JWT ? SUPABASE_ANON_KEY : "");
   const res = await fetch(BASE + path, {
     method,
     headers: {
       apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${token || SUPABASE_ANON_KEY}`,
+      ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
       ...(body ? { "Content-Type": "application/json" } : {}),
       ...headers,
     },
