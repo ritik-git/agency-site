@@ -1,6 +1,7 @@
 /* Document shell, header, mobile menu, footer — blueprint §8.1, §8.12, §18.5 */
 import { html, raw, url, asset, icon, ctx, ph, isProd, chars } from "../lib/core.mjs";
 import { Button, Logo, TextLink } from "./ui.mjs";
+import { ActionBar } from "./action-bar.mjs";
 import { site, nav, services, footer as footerContent } from "../../content/site.mjs";
 
 const navHref = (href, onHome) => (onHome ? href : url("") + href);
@@ -128,13 +129,17 @@ ${styles.map((s) => html`<link rel="stylesheet" href="${asset(s)}">`)}
 <script>document.documentElement.classList.replace("no-js","js");</script>
 ${ld.map(jsonLd)}
 </head>
-<body class="${bodyClass}" id="top">
+<body class="${bodyClass}${chrome ? " has-action-bar" : ""}" id="top">
 ${chrome ? html`<a class="skip-link" href="#main">Skip to content</a>
 ${SiteHeader({ onHome })}` : ""}
 <main id="main" tabindex="-1">
 ${body}
 </main>
 ${chrome ? html`${SiteFooter({ onHome })}
+${ActionBar({
+  contactHref: onHome || String(body).includes('id="contact"') ? "#contact" : url("") + "#contact",
+  whatsapp: site.whatsapp, lines: site.actionBar,
+})}
 ${MobileMenu({ onHome })}` : ""}
 ${scripts.map((s) => html`<script type="module" src="${asset("js/" + s)}"></script>`)}
 </body>

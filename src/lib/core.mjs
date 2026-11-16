@@ -81,6 +81,9 @@ const ICONS = {
   download: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
   refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/>',
   search: '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+  lock: '<rect x="5" y="10.5" width="14" height="10"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 7 0v3M12 14.5v2"/>',
+  phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/>',
+  whatsapp: '<path d="M12 3.5a8.5 8.5 0 0 0-7.4 12.7L3.5 20.5l4.4-1.1A8.5 8.5 0 1 0 12 3.5z" stroke-linejoin="round"/><path d="M9.3 7.6c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5-.1 1.7-.7 2-1.4.2-.7.2-1.3.1-1.4l-.5-.3-1.9-.9c-.3-.1-.5-.2-.7.1l-.8 1.1c-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.3-.8-.7-1.4-1.6-1.5-1.9-.2-.3 0-.4.1-.6l.4-.5.3-.5c.1-.2 0-.3 0-.5l-.9-2.3z" fill="currentColor" stroke="none"/>',
 };
 export function icon(name, size = 16, cls = "icon") {
   return raw(
@@ -112,3 +115,38 @@ export function picture(name, { alt = "", sizes = "100vw", eager = false, cls = 
   </picture>`;
 }
 export const imageSrc = (name, w) => asset(`img/${name}-${w}.webp`);
+
+/** Intrinsic { w, h } of an SVG, PNG, JPEG or WebP file (from its header), or {} if unknown. */
+export function imageSize(file) {
+  const buf = readFileSync(file);
+  if (/\.svg$/i.test(file)) {
+    const text = buf.toString("utf8");
+    const vb = text.match(/viewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/i);
+    if (vb) return { w: +vb[1], h: +vb[2] };
+    const w = +(text.match(/<svg[^>]*\swidth\s*=\s*["']([\d.]+)/i) || [])[1];
+    const h = +(text.match(/<svg[^>]*\sheight\s*=\s*["']([\d.]+)/i) || [])[1];
+    return w && h ? { w, h } : {};
+  }
+  if (buf.length > 24 && buf.readUInt32BE(0) === 0x89504e47) return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) };
+  if (buf.length > 4 && buf[0] === 0xff && buf[1] === 0xd8) { // JPEG: walk segments to the first SOFn
+    for (let i = 2; i + 9 < buf.length; ) {
+      if (buf[i] !== 0xff) { i++; continue; }
+      const m = buf[i + 1];
+      if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return { w: buf.readUInt16BE(i + 7), h: buf.readUInt16BE(i + 5) };
+      i += 2 + buf.readUInt16BE(i + 2);
+    }
+  }
+  if (buf.length > 30 && buf.toString("ascii", 8, 12) === "WEBP") {
+    const chunk = buf.toString("ascii", 12, 16);
+    if (chunk === "VP8X") return { w: buf.readUIntLE(24, 3) + 1, h: buf.readUIntLE(27, 3) + 1 };
+    if (chunk === "VP8 ") return { w: buf.readUInt16LE(26) & 0x3fff, h: buf.readUInt16LE(28) & 0x3fff };
+    if (chunk === "VP8L") { const b = buf.readUInt32LE(21); return { w: (b & 0x3fff) + 1, h: ((b >> 14) & 0x3fff) + 1 }; }
+  }
+  return {};
+}
+
+/** Single-file <img> for a photo under static/img (no responsive variants), with intrinsic size. */
+export function photo(rel, { alt = "", cls = "", style = "" } = {}) {
+  const { w, h } = imageSize(path.join(ROOT, "static/img", rel));
+  return html`<img class="${cls}" src="${asset("img/" + rel)}" ${w ? raw(`width="${w}" height="${h}"`) : ""} alt="${alt}" ${style ? html`style="${style}"` : ""} loading="lazy" decoding="async">`;
+}

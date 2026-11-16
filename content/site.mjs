@@ -15,6 +15,16 @@ export const site = {
   url: "https://example.github.io",    // [PLACEHOLDER] set SITE_URL at build time
   email: null,                         // e.g. "hello@adverbright.com"
   phone: null,                         // optional, e.g. "+91 98xxxxxxx"
+  whatsapp: "+91 7000590736",          // sticky action bar → https://wa.me/<digits>; set null to hide that button
+  // Sticky bar headline: rotates through these lines (~4s each). `accent` words show in lime,
+  // `note` is the small line underneath. Keep each headline under ~24 characters so it fits on phones.
+  actionBar: [
+    { lead: "Grow your", accent: "ecom business", note: "Speak to our team today" },
+    { lead: "Got a product?", accent: "Let's talk", note: "Tell us what you're selling" },
+    { lead: "Ready to", accent: "scale your store?", note: "We'd love to hear about it" },
+    { lead: "Ads that", accent: "actually sell", note: "Say hi — we're listening" },
+    { lead: "Your next", accent: "best-seller", note: "Starts with one chat" },
+  ],
   location: null,                      // e.g. "Indore, India"
   responseTime: "24 hours",            // [CONFIRM] promise shown in hero + contact
   currency: "$",                       // [CONFIRM] reference uses USD; switch to "₹" for India
@@ -180,16 +190,19 @@ export const why = {
 
 export const founder = {
   index: "06",
-  label: "The founder",
-  title: ["Built by a", "creator, for", "growth-minded", "brands."],
+  label: "The team",
+  title: ["Built by", "creators, for", "growth-minded", "brands."],
   accentFrom: 2,
-  name: "Shubham Jain",              // [CONFIRM] from the reference site
-  firstName: "Shubham",
-  role: "Founder & Creative Director", // [CONFIRM]
   quote: null,                        // one-sentence founder belief
   bio: [null],                        // 1–2 short paragraphs
-  linkedin: null,
-  photo: null,                        // set to an image name in static/img once supplied
+  // Shown in this order. Photos live in static/img/founders/ (shown in black & white on the site).
+  // focus = CSS object-position for the 4:5 crop. Only list people who are actually on the team.
+  people: [
+    { name: "Shubham Jain", role: "Founder & Creative Director", photo: "founders/shubham-jain.webp", focus: "50% 30%", linkedin: null },
+    { name: "Krupa Jain", role: "AI Ads Head", photo: "founders/krupa-jain.jpg", focus: "50% 36%", linkedin: null },
+    { name: "Ashwin Pillai", role: "Performance Marketing Head", photo: "founders/ashwin-pillai.webp", focus: "50% 34%", linkedin: null },
+    { name: "Dhruv Agarwal", role: "Performance Marketer", photo: "founders/dhruv-agarwal.jpg", focus: "50% 50%", linkedin: null },
+  ],
 };
 
 export const testimonials = {
@@ -205,14 +218,33 @@ export const testimonials = {
 };
 
 export const trust = {
-  marquee: "Trusted by ambitious brands",
+  index: "Clients",
+  label: "Selected brands",
+  title: ["Trusted by Brands", "That Make a Difference"],
+  accentFrom: 1,
+  lead: "Proud to have collaborated with businesses and brands across different industries.",
+  // Files live in static/logos/ (see the README there). Replace a placeholder file with the real
+  // logo under the same name — the build detects placeholders and leaves them out of production.
+  // Optional per logo: scale (optical size tweak, e.g. 1.3 for square badges next to wide wordmarks),
+  // tone: "light" (dark-ink logo → always a light silhouette) or "lift" (light silhouette at rest, real colours on hover),
+  // brightness: greyscale brightness at rest (default 1.3; lower for white-on-colour badges, higher for murky logos).
   logos: [
-    // { name: "Brand", src: "logos/brand.svg" }  — SVG, monochrome
-    { isPlaceholder: true, name: "Client 01" },
-    { isPlaceholder: true, name: "Client 02" },
-    { isPlaceholder: true, name: "Client 03" },
-    { isPlaceholder: true, name: "Client 04" },
-    { isPlaceholder: true, name: "Client 05" },
+    { name: "Swiggy", src: "logos/swiggy.webp", brightness: 1.1 }, // official 2024 logo, Wikimedia Commons (CC0)
+    { name: "Vritus Australia", src: "logos/vritus-australia.png", scale: 1.35, brightness: 1.2 },
+    { name: "Extresy", src: "logos/extresy.png", tone: "light", scale: 0.8 },
+    { name: "Virgin Thread", src: "logos/virgin-thread.png", tone: "light", scale: 1.3 },
+    { name: "Solarhood", src: "logos/solarhood.webp", tone: "light", scale: 1.1 },
+    { name: "Capt. Zack", src: "logos/capt-zack.png", scale: 1.4, brightness: 0.85 },
+    { name: "Moodcare", src: "logos/moodcare.png", tone: "lift", scale: 0.95 },
+    { name: "Avimee Herbal", src: "logos/avimee-herbal.png", tone: "light", scale: 1.2 },
+    { name: "Goldy's Flower", src: "logos/goldys-flower.png", scale: 1.4, brightness: 1.9 },
+    { name: "Hidden", src: "logos/hidden.png", scale: 1.25, brightness: 1.5 },
+    { name: "Candid", src: "logos/candid.png", scale: 1.3 },
+    // Still placeholders — shown in preview builds only, left out of production until real files are added:
+    { name: "Greenveda", src: "logos/greenveda.svg" },
+    { name: "MACC", src: "logos/macc.svg" },
+    { name: "Jiva Herbals", src: "logos/jiva-herbals.svg" },
+    { name: "Tarella Exotica", src: "logos/tarella-exotica.svg" },
   ],
 };
 
@@ -226,7 +258,63 @@ export const contact = {
     "A 20-minute call to understand your goals", // [CONFIRM]
     "You receive a creative plan and quote",   // [CONFIRM]
   ],
-  budgets: ["Under 2k", "2k – 5k", "5k – 10k", "10k+"], // prefixed with site.currency
+  // Consultation form. `value`s are what's stored in the database (supabase/migrations/002_consultation_form.sql
+  // lists the allowed values) — change labels freely, but keep values in sync with that file if you edit them.
+  // `wide: true` makes an option span the full row.
+  form: {
+    intro: "4 quick steps — mostly taps, very little typing.",
+    submit: "Book my consultation",
+    reassurance: "Your information stays confidential. We'll use it only to understand your business and prepare for our conversation.",
+    revenueCurrent: {
+      question: "What is your current average monthly revenue?",
+      options: [
+        { value: "pre-revenue", label: "Pre-revenue / Just starting", wide: true },
+        { value: "below-1l", label: "Below ₹1 Lakh" },
+        { value: "1l-5l", label: "₹1L – ₹5L" },
+        { value: "5l-10l", label: "₹5L – ₹10L" },
+        { value: "10l-25l", label: "₹10L – ₹25L" },
+        { value: "25l-50l", label: "₹25L – ₹50L" },
+        { value: "50l-plus", label: "₹50L+" },
+      ],
+    },
+    revenueTarget: {
+      question: "What's your target monthly revenue?",
+      options: [
+        { value: "1l-5l", label: "₹1L – ₹5L" },
+        { value: "5l-10l", label: "₹5L – ₹10L" },
+        { value: "10l-25l", label: "₹10L – ₹25L" },
+        { value: "25l-50l", label: "₹25L – ₹50L" },
+        { value: "50l-1cr", label: "₹50L – ₹1Cr" },
+        { value: "1cr-plus", label: "₹1Cr+" },
+      ],
+    },
+    timeline: {
+      question: "When do you want to achieve this?",
+      options: [
+        { value: "3m", label: "3 months" },
+        { value: "6m", label: "6 months" },
+        { value: "9m", label: "9 months" },
+        { value: "12m", label: "12 months" },
+        { value: "flexible", label: "Flexible timeline" },
+      ],
+    },
+    challenges: {
+      question: "What's the biggest challenge holding your business back right now?",
+      hint: "Select all that apply",
+      options: [
+        { value: "leads", label: "Generating consistent leads" },
+        { value: "conversion", label: "Converting leads into customers" },
+        { value: "scaling", label: "Scaling revenue" },
+        { value: "awareness", label: "Building brand awareness" },
+        { value: "profitable-ads", label: "Running profitable ads" },
+        { value: "website", label: "Improving website & online presence" },
+        { value: "retention", label: "Customer retention" },
+        { value: "not-sure", label: "Not sure where to start" },
+      ],
+      otherLabel: "Something else? (Optional)",
+      otherPlaceholder: "Tell us briefly about your challenge...",
+    },
+  },
 };
 
 export const footer = {

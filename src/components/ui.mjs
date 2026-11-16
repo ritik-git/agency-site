@@ -1,5 +1,5 @@
 /* UI primitives — blueprint §12 */
-import { html, chars, icon, lines } from "../lib/core.mjs";
+import { html, raw, chars, icon, lines } from "../lib/core.mjs";
 
 /** Button — `<a>` when it navigates, `<button>` when it acts. */
 export function Button({ label, href, variant = "primary", size = "md", iconName = "arrow-up-right", type = "button", attrs = "", cls = "" }) {
@@ -37,6 +37,38 @@ export function SectionHeader({ id, index, label, title, accentFrom, aside, cls 
     </div>
     ${aside ? html`<div class="section-header__aside" data-reveal>${aside}</div>` : ""}
   </header>`;
+}
+
+/**
+ * ChoiceGroup — a question answered by tapping option cards (§ consultation form).
+ * Native radios/checkboxes inside <label>s, so keyboard (Tab / arrow keys / Space), screen readers
+ * and form submission all work without JS. Visuals hang off `input:checked + .choice__body`.
+ * @param {object} o
+ * @param {string} o.id        prefix for ids
+ * @param {string} o.name      form field name
+ * @param {string} o.legend    the question
+ * @param {Array<{value: string, label: string, wide?: boolean}>} o.options
+ * @param {"radio"|"checkbox"} [o.type]
+ * @param {boolean} [o.required]
+ * @param {string} [o.hint]
+ * @param {"2"|"compact"|"list"} [o.layout]  "2": two columns; "compact": short labels, two per row on phones,
+ *        three from 480px; "list": longer labels, one column on phones, two from 480px
+ * @param {*} [o.after]        extra markup inside the fieldset, after the options (e.g. an "other" field)
+ */
+export function ChoiceGroup({ id, name, legend, options, type = "radio", required = false, hint = "", layout = "2", after = "" }) {
+  const mark = type === "checkbox" ? icon("check", 12, "icon choice__check") : "";
+  return html`<fieldset class="choices" id="${id}" data-choices="${name}" ${required ? raw("data-required") : ""} aria-describedby="${hint ? `${id}-hint ` : ""}${id}-error">
+    <legend class="choices__legend">${legend}${required ? html` <span class="req" aria-hidden="true">*</span>` : ""}</legend>
+    ${hint ? html`<p class="choices__hint" id="${id}-hint">${hint}</p>` : ""}
+    <div class="choices__grid choices__grid--${layout}">
+      ${options.map((o) => html`<label class="choice${o.wide ? " choice--wide" : ""}">
+        <input class="choice__input" type="${type}" name="${name}" value="${o.value}">
+        <span class="choice__body"><span class="choice__mark choice__mark--${type}" aria-hidden="true">${mark}</span><span class="choice__text">${o.label}</span></span>
+      </label>`)}
+    </div>
+    ${after}
+    <p class="field__error choices__error" id="${id}-error" hidden>${icon("alert", 14)}<span></span></p>
+  </fieldset>`;
 }
 
 export function Logo({ name, suffix, href }) {

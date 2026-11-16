@@ -4,6 +4,10 @@ import { isConfigured, signIn, signOut, getSession, listLeads, updateLead, isAdm
 
 const SERVICES = Object.fromEntries($$("[data-filter-service] option").filter((o) => o.value).map((o) => [o.value, o.textContent]));
 const STATUSES = ["new", "contacted", "qualified", "won", "lost", "spam"];
+// Consultation-form labels (value → label), embedded by the page from content/site.mjs
+const OPTS = (() => { try { return JSON.parse($("#lead-options")?.textContent || "{}"); } catch { return {}; } })();
+const lbl = (field, v) => (v == null || v === "" ? "" : OPTS[field]?.[v] || v);
+const challengeList = (l) => (Array.isArray(l.challenges) ? l.challenges.map((c) => lbl("challenges", c)).join("; ") : "");
 const root = $("[data-admin]");
 let leads = [];
 let openId = null;
@@ -92,7 +96,7 @@ function filtered() {
   const sv = $("[data-filter-service]").value;
   return leads.filter((l) =>
     (!st || l.status === st) && (!sv || l.service === sv) &&
-    (!q || [l.name, l.email, l.company, l.message, l.website].some((v) => (v || "").toLowerCase().includes(q))));
+    (!q || [l.name, l.email, l.company, l.message, l.website, l.phone, l.challenge_other].some((v) => (v || "").toLowerCase().includes(q))));
 }
 
 function renderKpis() {
@@ -123,7 +127,7 @@ function renderRows() {
       el("td", {}, open, el("span", { class: "admin-sub", textContent: l.email })),
       el("td", { textContent: l.company || "" }),
       el("td", { textContent: SERVICES[l.service] || l.service || "" }),
-      el("td", { textContent: l.budget || "" }),
+      el("td", { textContent: lbl("revenue_current", l.revenue_current) || l.budget || "" }),
       el("td", {}, badge(l.status)));
   }));
 }
@@ -139,10 +143,18 @@ function openDrawer(id, trigger) {
   const website = l.website && /^https?:\/\//i.test(l.website) ? el("a", { href: l.website, target: "_blank", rel: "noopener noreferrer", textContent: l.website }) : (l.website || "—");
   const rows = [
     ["Email", el("a", { href: `mailto:${l.email}`, textContent: l.email })],
+    ["Phone", l.phone ? el("a", { href: `tel:${l.phone.replace(/[^\d+]/g, "")}`, textContent: l.phone }) : "—"],
     ["Brand", l.company || "—"],
-    ["Website", website],
+    ...(l.website ? [["Website", website]] : []),
     ["Service", SERVICES[l.service] || l.service || "—"],
-    ["Budget", l.budget || "—"],
+    ...(l.revenue_current
+      ? [
+          ["Revenue now", lbl("revenue_current", l.revenue_current)],
+          ["Target", [lbl("revenue_target", l.revenue_target), lbl("target_timeline", l.target_timeline)].filter(Boolean).join(" · ") || "—"],
+          ["Challenges", challengeList(l) || "—"],
+          ...(l.challenge_other ? [["Something else", l.challenge_other]] : []),
+        ]
+      : [["Budget", l.budget || "—"]]),
     ["Received", fmtDate(l.created_at)],
     ["Consent", l.consent ? "Yes" : "No"],
   ];
@@ -191,10 +203,15 @@ $("[data-d-save]").addEventListener("click", async (e) => {
 ["[data-search]", "[data-filter-status]", "[data-filter-service]"].forEach((s) => $(s).addEventListener("input", renderRows));
 $("[data-refresh]").addEventListener("click", load);
 $("[data-export]").addEventListener("click", () => {
-  const cols = ["created_at", "name", "email", "company", "website", "service", "budget", "status", "message", "notes"];
+  const cols = ["created_at", "name", "email", "phone", "company", "website", "service", "budget",
+    "revenue_current", "revenue_target", "target_timeline", "challenges", "challenge_other", "status", "message", "notes"];
+  const value = (l, c) =>
+    c === "challenges" ? challengeList(l)
+    : ["revenue_current", "revenue_target", "target_timeline"].includes(c) ? lbl(c, l[c])
+    : l[c];
   // Prefix cells starting with = + - @ to prevent CSV formula injection in Excel/Sheets
   const cell = (v) => { let s = v == null ? "" : String(v); if (/^[=+\-@]/.test(s)) s = "'" + s; return `"${s.replace(/"/g, '""')}"`; };
-  const csv = [cols.join(","), ...filtered().map((l) => cols.map((c) => cell(l[c])).join(","))].join("\r\n");
+  const csv = [cols.join(","), ...filtered().map((l) => cols.map((c) => cell(value(l, c))).join(","))].join("\r\n");
   const a = el("a", { href: URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" })), download: `leads-${new Date().toISOString().slice(0, 10)}.csv` });
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);

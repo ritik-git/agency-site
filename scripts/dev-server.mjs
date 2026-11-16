@@ -58,7 +58,13 @@ async function mock(req, res, p, q) {
       const ts = (recent.get(ip) || []).filter((t) => Date.now() - t < 10 * 60e3);
       if (ts.length >= 5) return send(res, 400, { code: "P0001", message: "Too many submissions, please try again later." });
       recent.set(ip, [...ts, Date.now()]);
-      const allowed = ["name", "email", "company", "website", "service", "budget", "message", "consent", "source_url"];
+      // Mirrors schema.sql + migrations/002 (unknown columns → PostgREST's PGRST204, like the real API)
+      const allowed = ["name", "email", "company", "website", "service", "budget", "message", "consent", "source_url",
+        "phone", "revenue_current", "revenue_target", "target_timeline", "challenges", "challenge_other"];
+      const unknown = Object.keys(b).find((k) => !allowed.includes(k));
+      if (unknown) return send(res, 400, { code: "PGRST204", message: `Could not find the '${unknown}' column of 'leads' in the schema cache` });
+      if (b.phone != null && !/^\+?[0-9 ()\-.]{7,20}$/.test(b.phone)) return send(res, 400, { code: "23514", message: "new row violates check constraint" });
+      if (b.challenges != null && (!Array.isArray(b.challenges) || b.challenges.length > 8)) return send(res, 400, { code: "23514", message: "new row violates check constraint" });
       const row = Object.fromEntries(allowed.map((k) => [k, b[k] ?? null]));
       leads.unshift({ id: crypto.randomUUID(), created_at: new Date().toISOString(), status: "new", notes: null, consent_at: new Date().toISOString(), ...row });
       return send(res, 201, null);

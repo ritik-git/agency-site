@@ -15,7 +15,7 @@ CHECK = """() => {
   const wide = [...document.querySelectorAll('body *')].filter(e => {
     const r = e.getBoundingClientRect(); if (!r.width) return false;
     const st = getComputedStyle(e);
-    if (e.closest('svg') || e.closest('.marquee, .site-footer__wordmark, .admin-table-wrap, .hp, .visually-hidden, .skip-link, .service-preview, .hero__bg, .hero-visual__glow')) return false;
+    if (e.closest('svg') || e.closest('.logo-marquee,.site-footer__wordmark, .admin-table-wrap, .hp, .visually-hidden, .skip-link, .service-preview, .hero__bg, .hero-visual__glow')) return false;
     return r.right > doc.clientWidth + 1 || r.left < -1;
   }).slice(0, 5).map(e => e.className || e.tagName);
   // hero collisions: orbit labels vs format frames vs each other vs orb circle

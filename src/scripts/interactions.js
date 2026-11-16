@@ -121,9 +121,45 @@ export function initProcess() {
   window.addEventListener("resize", onScroll, { passive: true });
 }
 
+/* ---- Action bar: get out of the way of the contact form and keyboards --- */
+export function initActionBar() {
+  const bar = $("[data-action-bar]");
+  if (!bar) return;
+  const reasons = new Set();
+  const set = (why, on) => { on ? reasons.add(why) : reasons.delete(why); bar.classList.toggle("is-hidden", reasons.size > 0); };
+
+  // The form itself is the destination of "Contact us" — and the bar would cover its submit button.
+  const form = $("[data-contact-form]")?.closest(".contact__form-wrap") || $("[data-contact-form]");
+  if (form && "IntersectionObserver" in window) {
+    new IntersectionObserver(([e]) => set("form", e.isIntersecting), { rootMargin: "0px 0px -15% 0px" }).observe(form);
+  }
+  // On-screen keyboards push fixed elements up over the field being typed in.
+  const isField = (el) => el && el.matches && el.matches("input, textarea, select") && !bar.contains(el);
+  document.addEventListener("focusin", (e) => set("typing", isField(e.target)));
+  document.addEventListener("focusout", () => setTimeout(() => set("typing", isField(document.activeElement)), 0));
+
+  // Rotating headline: a new conversational line every few seconds. Paused while hovered,
+  // while the bar is hidden and while the tab is in the background. Off for reduced motion.
+  const phrases = $$("[data-phrase]", bar);
+  if (phrases.length < 2 || reducedMotion()) return;
+  let i = 0, hovered = false;
+  bar.addEventListener("pointerenter", () => (hovered = true));
+  bar.addEventListener("pointerleave", () => (hovered = false));
+  setInterval(() => {
+    if (hovered || document.hidden || reasons.size) return;
+    const cur = phrases[i];
+    i = (i + 1) % phrases.length;
+    cur.classList.remove("is-active");
+    cur.classList.add("is-leaving");
+    phrases[i].classList.add("is-active");
+    setTimeout(() => cur.classList.remove("is-leaving"), 650);
+  }, 4200);
+}
+
 /* ---- Marquee: pause when off-screen ---------------------------------- */
 export function initMarquee() {
-  const m = $("[data-marquee]");
-  if (!m || !("IntersectionObserver" in window)) return;
-  new IntersectionObserver(([e]) => m.classList.toggle("is-paused", !e.isIntersecting)).observe(m);
+  const list = $$("[data-marquee]");
+  if (!list.length || !("IntersectionObserver" in window)) return;
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => e.target.classList.toggle("is-paused", !e.isIntersecting)));
+  list.forEach((m) => io.observe(m));
 }

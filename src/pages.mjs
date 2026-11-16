@@ -20,7 +20,7 @@ export function Home() {
       "@context": "https://schema.org", "@type": "ProfessionalService", name: C.site.legalName,
       url: origin() + url(""), image: origin() + url("og-image.jpg"), description: C.site.seo.description,
       ...(C.site.location ? { areaServed: C.site.location } : {}),
-      founder: { "@type": "Person", name: C.founder.name, jobTitle: C.founder.role },
+      founder: C.founder.people.filter((p) => p.name).map((p) => ({ "@type": "Person", name: p.name, ...(p.role ? { jobTitle: p.role } : {}) })),
     },
   ];
   return Document({
@@ -145,10 +145,18 @@ export function NotFound() {
 /* ---------------------------------------------------------------- ADMIN */
 export function Admin() {
   const statusOpts = ["new", "contacted", "qualified", "won", "lost", "spam"];
+  // Consultation-form option labels for the inbox (value → label), from content/site.mjs
+  const F = C.contact.form;
+  const toMap = (opts) => Object.fromEntries(opts.map((o) => [o.value, o.label]));
+  const leadOptions = JSON.stringify({
+    revenue_current: toMap(F.revenueCurrent.options), revenue_target: toMap(F.revenueTarget.options),
+    target_timeline: toMap(F.timeline.options), challenges: toMap(F.challenges.options),
+  }).replace(/</g, "\\u003c");
   return Document({
     title: `Leads | ${C.site.name} admin`, description: "Admin", path: "admin/", noindex: true, chrome: false,
     styles: ["site.css", "admin.css"], scripts: ["admin.js"], bodyClass: "admin-body",
     body: html`
+    <script type="application/json" id="lead-options">${raw(leadOptions)}</script>
     <div class="admin" data-admin>
       <header class="admin-bar">
         ${Logo({ name: C.site.name, suffix: "Admin", href: url("admin/") })}
@@ -197,7 +205,7 @@ export function Admin() {
         <p class="admin-status" role="status" data-status></p>
         <div class="admin-table-wrap">
           <table class="admin-table">
-            <thead><tr><th scope="col">Received</th><th scope="col">Name</th><th scope="col">Brand</th><th scope="col">Service</th><th scope="col">Budget</th><th scope="col">Status</th></tr></thead>
+            <thead><tr><th scope="col">Received</th><th scope="col">Name</th><th scope="col">Brand</th><th scope="col">Service</th><th scope="col">Revenue / budget</th><th scope="col">Status</th></tr></thead>
             <tbody data-rows></tbody>
           </table>
         </div>

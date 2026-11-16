@@ -43,7 +43,14 @@ create table if not exists public.leads (
   source_url  text check (char_length(source_url) <= 500),
   status      text not null default 'new' check (status in ('new','contacted','qualified','won','lost','spam')),
   notes       text check (char_length(notes) <= 2000),
-  ip_hash     text
+  ip_hash     text,
+  -- consultation form (also added to existing databases by migrations/002_consultation_form.sql)
+  phone           text check (phone is null or (char_length(phone) between 7 and 20 and phone ~ '^\+?[0-9 ()\-.]+$')),
+  revenue_current text check (revenue_current is null or revenue_current in ('pre-revenue','below-1l','1l-5l','5l-10l','10l-25l','25l-50l','50l-plus')),
+  revenue_target  text check (revenue_target is null or revenue_target in ('1l-5l','5l-10l','10l-25l','25l-50l','50l-1cr','1cr-plus')),
+  target_timeline text check (target_timeline is null or target_timeline in ('3m','6m','9m','12m','flexible')),
+  challenges      text[] check (challenges is null or (cardinality(challenges) <= 8 and challenges <@ array['leads','conversion','scaling','awareness','profitable-ads','website','retention','not-sure']::text[])),
+  challenge_other text check (challenge_other is null or char_length(challenge_other) <= 500)
 );
 create index if not exists leads_created_at_idx on public.leads (created_at desc);
 create index if not exists leads_ip_recent_idx  on public.leads (ip_hash, created_at desc);
@@ -52,7 +59,8 @@ alter table public.leads enable row level security;
 
 -- Column-level privileges: the public can only write the form fields.
 revoke all on public.leads from anon, authenticated;
-grant insert (name, email, company, website, service, budget, message, consent, source_url) on public.leads to anon;
+grant insert (name, email, company, website, service, budget, message, consent, source_url,
+              phone, revenue_current, revenue_target, target_timeline, challenges, challenge_other) on public.leads to anon;
 grant select on public.leads to authenticated;
 grant update (status, notes) on public.leads to authenticated;
 

@@ -17,6 +17,11 @@ About 15 minutes. You need a GitHub account and a Supabase account.
 6. **Project Settings → API** (or **Data API**): copy the **Project URL** and the **anon / public** key.
    Never use the `service_role` key in this project.
 
+> **Already set up the database before the consultation form?** Run `supabase/migrations/002_consultation_form.sql`
+> once in the SQL Editor. It adds phone, revenue, goal and challenge columns. (A fresh `schema.sql` already includes them.)
+> The form keeps working without it — answers are saved as a summary in the lead's message — but the migration
+> stores them as proper columns you can filter and export.
+
 ## 2. Publish the site (GitHub Pages)
 
 1. Create a new **public** GitHub repository (e.g. `agency-site`) and push this folder to its `main` branch:

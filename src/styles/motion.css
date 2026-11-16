@@ -52,7 +52,17 @@
   html { scroll-behavior: auto; }
   .js [data-reveal] { transform: none; }
   .js [data-reveal]:not(.is-in) { opacity: 0; }
-  .marquee__track { animation: none; transform: none; width: 100%; justify-content: center; }
-  .marquee__group[aria-hidden="true"], .marquee__group .marquee__item ~ .marquee__item, .marquee__group .marquee__sep ~ .marquee__sep { display: none; }
+  /* Logo marquee: static, centred, wrapping row of the original list (duplicates are aria-hidden) */
+  .logo-marquee { -webkit-mask-image: none; mask-image: none; }
+  .logo-marquee__track { animation: none; transform: none; width: 100%; justify-content: center; }
+  .logo-marquee__group { flex-wrap: wrap; justify-content: center; flex-shrink: 1; }
+  .logo-marquee [aria-hidden="true"] { display: none; }
+  /* Action bar: no entrance slide, no pulse, no lift */
+  .action-bar__inner { animation: none; }
+  .action-bar__phrase { transform: none; }
+  .choice:active .choice__body { transform: none; }
+  .form-step.is-entering { animation: none; }
+  .action-bar__dot::after { display: none; }
+  .action-bar__btn:hover, .action-bar__btn:active { transform: none !important; }
   .site-header.is-hidden { transform: none; }
 }

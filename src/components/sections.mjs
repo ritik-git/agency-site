@@ -1,6 +1,7 @@
 /* Home page sections — blueprint §8.2–§8.11 */
-import { html, chars, raw, url, icon, lines, ph, real, isProd, picture, imageSrc } from "../lib/core.mjs";
-import { Button, TextLink, Eyebrow, Tag, FormatBadge, Section, SectionHeader } from "./ui.mjs";
+import { html, chars, raw, url, icon, lines, ph, real, isProd, picture, imageSrc, photo } from "../lib/core.mjs";
+import { Button, TextLink, Eyebrow, Tag, FormatBadge, Section, SectionHeader, ChoiceGroup } from "./ui.mjs";
+import { LogoMarquee, resolveLogos } from "./logo-marquee.mjs";
 import * as C from "../../content/site.mjs";
 
 const pad = (n) => String(n).padStart(2, "0");
@@ -64,18 +65,22 @@ export function Hero() {
 
 /* --------------------------------------------------------- TRUST STRIP */
 export function TrustStrip() {
-  const logos = real(C.trust.logos);
+  const t = C.trust;
+  const logos = real(resolveLogos(t.logos));
   if (isProd() && logos.length < 4) return ""; // §7.3 — no fake logo boxes in production
-  const run = html`<span class="marquee__item">${C.trust.marquee}</span><span class="marquee__sep" aria-hidden="true">✳</span>`;
-  const group = (hidden) => html`<div class="marquee__group" ${hidden ? raw('aria-hidden="true"') : ""}>${Array(4).fill(run)}</div>`;
-  return html`<section class="trust" aria-label="Clients">
-    <div class="marquee" data-marquee><div class="marquee__track">${group(false)}${group(true)}</div></div>
-    <ul class="logo-grid logo-grid--${logos.length}">
-      ${logos.map((l) => html`<li class="logo-grid__cell">${
-        l.src ? html`<img src="${url("assets/" + l.src)}" alt="${l.name}" width="120" height="28" loading="lazy">` : ph(null, "CLIENT LOGO")
-      }</li>`)}
-    </ul>
-  </section>`;
+  return Section({
+    labelledBy: "clients-title", cls: "clients",
+    children: html`<div class="container">
+      <header class="section-header section-header--aside">
+        <div class="section-header__main">
+          ${Eyebrow(t)}
+          <h2 class="h3 clients__title" id="clients-title" data-line-reveal>${lines(t.title, t.accentFrom)}</h2>
+        </div>
+        <div class="section-header__aside" data-reveal><p class="lead">${t.lead}</p></div>
+      </header>
+    </div>
+    <div data-reveal>${LogoMarquee({ logos, label: "Brands we have worked with", cls: "clients__marquee" })}</div>`,
+  });
 }
 
 /* ------------------------------------------------------------ SERVICES */
@@ -230,33 +235,31 @@ export function WhyUs() {
 export function Founder() {
   const f = C.founder;
   const bio = f.bio.filter(Boolean);
+  const Person = (p, i) => html`<figure class="founder__person" data-reveal style="--d:${(i % 2) * 120}ms">
+    <div class="founder__frame">
+      ${p.photo
+        ? photo(p.photo, { alt: p.name ? `Portrait of ${p.name}` : "Portrait of a team member", style: p.focus ? `object-position:${p.focus}` : "" })
+        : picture("founder-placeholder", { alt: "Placeholder silhouette — founder portrait to be supplied", sizes: "(min-width:1024px) 22vw, 50vw" })}
+    </div>
+    <figcaption class="founder__caption">
+      <span class="founder__name">${ph(p.name, "FOUNDER NAME")}</span>
+      <span class="founder__role">${ph(p.role, "ROLE")}</span>
+      ${p.linkedin
+        ? html`<a class="founder__link" href="${p.linkedin}" target="_blank" rel="noopener" aria-label="${p.name} on LinkedIn">${icon("linkedin", 18)}</a>`
+        : ""}
+    </figcaption>
+  </figure>`;
   return Section({
     theme: "surface-1", labelledBy: "founder-title", cls: "founder",
     children: html`<div class="container founder__grid">
-      <figure class="founder__portrait" data-reveal>
-        <div class="founder__frame">
-          ${picture(f.photo || "founder-placeholder", {
-            alt: f.photo ? `Portrait of ${f.name}` : "Placeholder silhouette — founder portrait to be supplied",
-            sizes: "(min-width:1024px) 40vw, (min-width:768px) 60vw, 100vw",
-          })}
-          ${!f.photo && !isProd() ? html`<span class="founder__ph">${ph(null, "FOUNDER PHOTO")}</span>` : ""}
-        </div>
-        <figcaption class="founder__caption">${f.name} — ${f.role}, ${C.site.legalName}</figcaption>
-      </figure>
       <div class="founder__text">
         ${Eyebrow(f)}
         <h2 class="display-2" id="founder-title" ${chars(f.title)} data-line-reveal>${lines(f.title, f.accentFrom)}</h2>
         ${f.quote || !isProd() ? html`<blockquote class="pull-quote" data-reveal><p>${f.quote ? `“${f.quote}”` : ph(null, "ONE-SENTENCE FOUNDER BELIEF")}</p></blockquote>` : ""}
-        <p class="founder__name" data-reveal>${f.name}</p>
-        <p class="founder__role" data-reveal>${f.role}</p>
         <div class="founder__bio" data-reveal>${bio.length ? bio.map((b) => html`<p>${b}</p>`) : html`<p>${ph(null, "FOUNDER BIO — 2 SHORT PARAGRAPHS")}</p>`}</div>
-        <div class="founder__actions" data-reveal>
-          ${Button({ label: `Work with ${f.firstName}`, href: "#contact" })}
-          ${f.linkedin
-            ? html`<a class="icon-btn" href="${f.linkedin}" target="_blank" rel="noopener" aria-label="${f.name} on LinkedIn">${icon("linkedin", 20)}</a>`
-            : isProd() ? "" : html`<span class="icon-btn icon-btn--missing" title="LinkedIn URL missing">${icon("linkedin", 20)}</span>`}
-        </div>
+        <div class="founder__actions" data-reveal>${Button({ label: "Work with us", href: "#contact" })}</div>
       </div>
+      <div class="founder__people">${f.people.map(Person)}</div>
     </div>`,
   });
 }
@@ -304,7 +307,31 @@ export function Contact() {
     <p class="field__error" id="${id}-error" hidden>${icon("alert", 14)}<span></span></p>
   </div>`;
   const req = html`<span class="req" aria-hidden="true">*</span>`;
-  const chevron = icon("chevron", 14, "icon select__chevron");
+  const q = c.form;
+  // Four steps. With JS the form becomes a stepper (one step at a time, see scripts/contact.js);
+  // without JS every step shows in sequence and the submit button is always there.
+  const steps = [
+    { title: "About you", short: "About you" },
+    { title: "Where you are today", short: "Today" },
+    { title: "Where you want to be", short: "Goal" },
+    { title: "What's in the way", short: "Challenges" },
+  ];
+  const Step = (n, body) => html`<section class="form-step" aria-labelledby="form-step-${n}" data-form-step="${steps[n - 1].title}">
+    <h3 class="form-step__head" id="form-step-${n}" tabindex="-1"><span class="form-step__num" aria-hidden="true"><span class="form-step__digit">${pad(n)}</span>${icon("check", 14, "icon form-step__tick")}</span>${steps[n - 1].title}<span class="visually-hidden" data-step-status></span></h3>
+    ${body}
+  </section>`;
+  const Stepper = html`<div class="stepper" data-stepper hidden>
+    <ol class="stepper__list">
+      ${steps.map((s, i) => html`<li class="stepper__item" data-stepper-item>
+        <button class="stepper__btn" type="button" data-goto="${i}" disabled>
+          <span class="stepper__bar" aria-hidden="true"><span class="stepper__fill"></span></span>
+          <span class="stepper__meta"><span class="stepper__num">${pad(i + 1)}</span><span class="stepper__label">${s.short}</span></span>
+          <span class="visually-hidden" data-stepper-sr></span>
+        </button>
+      </li>`)}
+    </ol>
+    <p class="stepper__caption" aria-live="polite" data-stepper-caption></p>
+  </div>`;
   return Section({
     id: "contact", theme: "surface-2", labelledBy: "contact-title", cls: "contact",
     children: html`<div class="container split">
@@ -320,37 +347,48 @@ export function Contact() {
       </div>
       <div class="contact__form-wrap" data-reveal>
         <form class="contact-form" novalidate data-contact-form>
-          <div class="form-grid">
+          <p class="form-intro">${q.intro}</p>
+          ${Stepper}
+          <input type="hidden" name="service" value="not-sure" data-service-field>
+
+          ${Step(1, html`<div class="form-grid">
             ${field("f-name", html`Your name ${req}`, html`<input id="f-name" name="name" type="text" autocomplete="name" placeholder="Jane Doe" required maxlength="120" aria-describedby="f-name-error">`)}
-            ${field("f-email", html`Work email ${req}`, html`<input id="f-email" name="email" type="email" autocomplete="email" placeholder="jane@brand.com" required maxlength="200" aria-describedby="f-email-error">`)}
-            ${field("f-company", html`Brand / company ${req}`, html`<input id="f-company" name="company" type="text" autocomplete="organization" placeholder="Brand name" required maxlength="160" aria-describedby="f-company-error">`)}
-            ${field("f-website", "Website (optional)", html`<input id="f-website" name="website" type="url" autocomplete="url" placeholder="https://" maxlength="300" aria-describedby="f-website-error">`)}
-            ${field("f-service", html`What do you need? ${req}`, html`<div class="select"><select id="f-service" name="service" required aria-describedby="f-service-error">
-              <option value="">Choose a service</option>
-              ${C.services.items.map((s) => html`<option value="${s.slug}">${s.title}</option>`)}
-              <option value="not-sure">Not sure yet</option>
-            </select>${chevron}</div>`)}
-            ${field("f-budget", html`Estimated budget ${req}`, html`<div class="select"><select id="f-budget" name="budget" required aria-describedby="f-budget-error">
-              <option value="">Choose a range</option>
-              ${c.budgets.map((b) => html`<option value="${C.site.currency}${b}">${C.site.currency}${b}</option>`)}
-            </select>${chevron}</div>`)}
-            ${field("f-message", html`Tell us about the project ${req}`, html`<textarea id="f-message" name="message" rows="5" required minlength="10" maxlength="1000" placeholder="Goals, timeline, links — anything helpful." aria-describedby="f-message-error f-message-count"></textarea>`, {
-              full: true, hint: html`<p class="field__count" id="f-message-count"><span data-count-now>0</span> / 1000</p>`,
-            })}
-            <div class="field field--full field--check" data-field>
-              <label class="check" for="f-consent">
-                <input id="f-consent" name="consent" type="checkbox" required aria-describedby="f-consent-error">
-                <span class="check__box" aria-hidden="true">${icon("check", 14)}</span>
-                <span>I agree to the <a href="${url("privacy/")}">privacy policy</a>. ${req}</span>
-              </label>
-              <p class="field__error" id="f-consent-error" hidden>${icon("alert", 14)}<span></span></p>
-            </div>
-            <div class="hp" aria-hidden="true"><label for="f-fax">Leave empty</label><input id="f-fax" name="fax" type="text" tabindex="-1" autocomplete="off"></div>
+            ${field("f-email", html`Email address ${req}`, html`<input id="f-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="jane@brand.com" required maxlength="200" aria-describedby="f-email-error">`)}
+            ${field("f-phone", html`Phone number ${req}`, html`<input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+91 98765 43210" required maxlength="20" aria-describedby="f-phone-error">`)}
+            ${field("f-company", html`Brand name ${req}`, html`<input id="f-company" name="company" type="text" autocomplete="organization" placeholder="Your brand" required maxlength="160" aria-describedby="f-company-error">`)}
+          </div>`)}
+
+          ${Step(2, ChoiceGroup({ id: "q-revenue", name: "revenue_current", legend: q.revenueCurrent.question, options: q.revenueCurrent.options, required: true }))}
+
+          ${Step(3, html`
+            ${ChoiceGroup({ id: "q-target", name: "revenue_target", legend: q.revenueTarget.question, options: q.revenueTarget.options, required: true })}
+            ${ChoiceGroup({ id: "q-timeline", name: "target_timeline", legend: q.timeline.question, options: q.timeline.options, required: true, layout: "compact" })}`)}
+
+          ${Step(4, html`${ChoiceGroup({
+            id: "q-challenges", name: "challenges", type: "checkbox", legend: q.challenges.question, hint: q.challenges.hint,
+            options: q.challenges.options, required: true, layout: "list",
+            after: html`<div class="field choices__other" data-field>
+              <label class="field__label" for="f-other">${q.challenges.otherLabel}</label>
+              <textarea id="f-other" name="challenge_other" rows="2" maxlength="500" placeholder="${q.challenges.otherPlaceholder}" aria-describedby="f-other-error"></textarea>
+              <p class="field__error" id="f-other-error" hidden>${icon("alert", 14)}<span></span></p>
+            </div>`,
+          })}
+          <div class="field field--check" data-field>
+            <label class="check" for="f-consent">
+              <input id="f-consent" name="consent" type="checkbox" required aria-describedby="f-consent-error">
+              <span class="check__box" aria-hidden="true">${icon("check", 14)}</span>
+              <span>I agree to the <a href="${url("privacy/")}">privacy policy</a>. ${req}</span>
+            </label>
+            <p class="field__error" id="f-consent-error" hidden>${icon("alert", 14)}<span></span></p>
+          </div>`)}
+
+          <div class="hp" aria-hidden="true"><label for="f-fax">Leave empty</label><input id="f-fax" name="fax" type="text" tabindex="-1" autocomplete="off"></div>
+          <div class="form-nav">
+            <button class="form-nav__back" type="button" data-prev hidden>${icon("arrow-left", 16)}<span>Back</span></button>
+            ${Button({ label: "Continue", type: "button", size: "lg", iconName: "arrow-right", cls: "form-nav__next", attrs: raw("data-next hidden") })}
+            ${Button({ label: q.submit, type: "submit", size: "lg", cls: "form-nav__submit", attrs: raw("data-submit") })}
           </div>
-          <div class="contact-form__submit">
-            ${Button({ label: "Send inquiry", type: "submit", size: "lg", attrs: raw("data-submit") })}
-            <p class="contact-form__note">We'll never share your details.</p>
-          </div>
+          <p class="contact-form__note">${icon("lock", 14, "icon contact-form__lock")}<span>${q.reassurance}</span></p>
           <p class="form-alert" role="alert" hidden data-form-alert></p>
           <noscript><p class="form-alert">This form needs JavaScript. ${C.site.email ? html`Email us at <a href="mailto:${C.site.email}">${C.site.email}</a>.` : ""}</p></noscript>
         </form>
