@@ -2,12 +2,16 @@
 import { $, $$, trapFocus } from "./utils.js";
 import { isConfigured, signIn, signOut, getSession, listLeads, updateLead, isAdmin } from "./supabase.js";
 
-const SERVICES = Object.fromEntries($$("[data-filter-service] option").filter((o) => o.value).map((o) => [o.value, o.textContent]));
 const STATUSES = ["new", "contacted", "qualified", "won", "lost", "spam"];
 // Consultation-form labels (value → label), embedded by the page from content/site.mjs
 const OPTS = (() => { try { return JSON.parse($("#lead-options")?.textContent || "{}"); } catch { return {}; } })();
 const lbl = (field, v) => (v == null || v === "" ? "" : OPTS[field]?.[v] || v);
-const challengeList = (l) => (Array.isArray(l.challenges) ? l.challenges.map((c) => lbl("challenges", c)).join("; ") : "");
+const challengeLabels = (l) => (Array.isArray(l.challenges) ? l.challenges.map((c) => lbl("challenges", c)) : []);
+const challengeList = (l) => challengeLabels(l).join("; ");
+const isConsultation = (l) => Boolean(l.revenue_current || l.revenue_target || l.target_timeline || l.phone);
+const phoneDigits = (p) => (p || "").replace(/[^\d+]/g, "");
+// wa.me needs the full international number without "+"; a bare 10-digit number is assumed Indian (+91).
+const waNumber = (p) => { const d = (p || "").replace(/\D/g, ""); return d.length === 10 ? "91" + d : d; };
 const root = $("[data-admin]");
 let leads = [];
 let openId = null;
@@ -93,10 +97,13 @@ async function load() {
 function filtered() {
   const q = $("[data-search]").value.trim().toLowerCase();
   const st = $("[data-filter-status]").value;
-  const sv = $("[data-filter-service]").value;
+  const qDigits = q.replace(/\D/g, ""); // phone search ignores spaces, dashes and "+"
+  const rev = $("[data-filter-revenue]").value;
+  const tl = $("[data-filter-timeline]").value;
   return leads.filter((l) =>
-    (!st || l.status === st) && (!sv || l.service === sv) &&
-    (!q || [l.name, l.email, l.company, l.message, l.website, l.phone, l.challenge_other].some((v) => (v || "").toLowerCase().includes(q))));
+    (!st || l.status === st) && (!rev || l.revenue_current === rev) && (!tl || l.target_timeline === tl) &&
+    (!q || [l.name, l.email, l.company, l.message, l.website, l.phone, l.challenge_other, challengeList(l)].some((v) => (v || "").toLowerCase().includes(q))
+      || (qDigits.length >= 4 && (l.phone || "").replace(/\D/g, "").includes(qDigits))));
 }
 
 function renderKpis() {
@@ -111,12 +118,20 @@ function renderKpis() {
 }
 
 function badge(s) { return el("span", { class: `status status--${s}`, textContent: s }); }
+const chip = (text, cls = "") => el("span", { class: `admin-chip ${cls}`.trim(), textContent: text });
+function challengeCell(l) {
+  const list = challengeLabels(l);
+  const kids = list.slice(0, 2).map((c) => chip(c));
+  if (list.length > 2) kids.push(chip(`+${list.length - 2}`, "admin-chip--more"));
+  if (l.challenge_other) kids.push(chip("Other", "admin-chip--more"));
+  return kids.length ? el("div", { class: "admin-chips" }, kids) : "—";
+}
 
 function renderRows() {
   const rows = filtered();
   const body = $("[data-rows]");
   if (!rows.length) {
-    body.replaceChildren(el("tr", {}, el("td", { colSpan: 6, class: "admin-empty", textContent: leads.length ? "No leads match these filters." : "No leads yet. New inquiries from the contact form will appear here." })));
+    body.replaceChildren(el("tr", {}, el("td", { colSpan: 8, class: "admin-empty", textContent: leads.length ? "No leads match these filters." : "No leads yet. New inquiries from the contact form will appear here." })));
     return;
   }
   body.replaceChildren(...rows.map((l) => {
@@ -124,10 +139,12 @@ function renderRows() {
     open.addEventListener("click", () => openDrawer(l.id, open));
     return el("tr", { class: l.status === "new" ? "is-new" : "" },
       el("td", { class: "admin-td-date", textContent: fmtDate(l.created_at) }),
-      el("td", {}, open, el("span", { class: "admin-sub", textContent: l.email })),
+      el("td", { class: "admin-td-name" }, open, el("span", { class: "admin-sub", textContent: l.email }), l.phone ? el("span", { class: "admin-sub", textContent: l.phone }) : null),
       el("td", { textContent: l.company || "" }),
-      el("td", { textContent: SERVICES[l.service] || l.service || "" }),
-      el("td", { textContent: lbl("revenue_current", l.revenue_current) || l.budget || "" }),
+      el("td", { class: "admin-td-strong", textContent: lbl("revenue_current", l.revenue_current) || l.budget || "—" }),
+      el("td", { class: "admin-td-strong", textContent: lbl("revenue_target", l.revenue_target) || "—" }),
+      el("td", { textContent: lbl("target_timeline", l.target_timeline) || "—" }),
+      el("td", {}, challengeCell(l)),
       el("td", {}, badge(l.status)));
   }));
 }
@@ -140,29 +157,52 @@ function openDrawer(id, trigger) {
   openId = id;
   lastFocus = trigger;
   $("[data-d-name]").textContent = l.name;
-  const website = l.website && /^https?:\/\//i.test(l.website) ? el("a", { href: l.website, target: "_blank", rel: "noopener noreferrer", textContent: l.website }) : (l.website || "—");
-  const rows = [
-    ["Email", el("a", { href: `mailto:${l.email}`, textContent: l.email })],
-    ["Phone", l.phone ? el("a", { href: `tel:${l.phone.replace(/[^\d+]/g, "")}`, textContent: l.phone }) : "—"],
-    ["Brand", l.company || "—"],
-    ...(l.website ? [["Website", website]] : []),
-    ["Service", SERVICES[l.service] || l.service || "—"],
-    ...(l.revenue_current
-      ? [
-          ["Revenue now", lbl("revenue_current", l.revenue_current)],
-          ["Target", [lbl("revenue_target", l.revenue_target), lbl("target_timeline", l.target_timeline)].filter(Boolean).join(" · ") || "—"],
-          ["Challenges", challengeList(l) || "—"],
-          ...(l.challenge_other ? [["Something else", l.challenge_other]] : []),
-        ]
-      : [["Budget", l.budget || "—"]]),
-    ["Received", fmtDate(l.created_at)],
-    ["Consent", l.consent ? "Yes" : "No"],
+
+  // Quick actions: email / WhatsApp / call
+  const subject = encodeURIComponent(`Your consultation request — ${l.company || "AdverBright"}`);
+  const action = (label, href, ext) => el("a", { class: "drawer__action", href, textContent: label, ...(ext ? { target: "_blank", rel: "noopener noreferrer" } : {}) });
+  $("[data-d-contact]").replaceChildren(
+    action("Email", `mailto:${l.email}?subject=${subject}`),
+    ...(l.phone ? [action("WhatsApp", `https://wa.me/${waNumber(l.phone)}`, true), action("Call", `tel:${phoneDigits(l.phone)}`)] : []),
+  );
+
+  // Answers, grouped like the form's four steps
+  const dl = (rows) => el("dl", { class: "drawer__meta" }, rows.filter(Boolean).flatMap(([k, v]) => [el("dt", { textContent: k }), el("dd", {}, v || "—")]));
+  const group = (num, title, body) => el("section", { class: "drawer__group" },
+    el("h3", { class: "drawer__group-title" }, el("span", { class: "drawer__group-num", textContent: num }), title), body);
+  const website = l.website && /^https?:\/\//i.test(l.website) ? el("a", { href: l.website, target: "_blank", rel: "noopener noreferrer", textContent: l.website }) : l.website;
+  const groups = [
+    group("01", "About", dl([
+      ["Email", el("a", { href: `mailto:${l.email}`, textContent: l.email })],
+      ["Phone", l.phone ? el("a", { href: `tel:${phoneDigits(l.phone)}`, textContent: l.phone }) : "—"],
+      ["Brand", l.company],
+      l.website ? ["Website", website] : null,
+    ])),
   ];
-  $("[data-d-meta]").replaceChildren(...rows.flatMap(([k, v]) => [el("dt", { textContent: k }), el("dd", {}, v)]));
+  if (isConsultation(l)) {
+    const ch = challengeLabels(l);
+    groups.push(
+      group("02", "Today", dl([["Revenue now", lbl("revenue_current", l.revenue_current)]])),
+      group("03", "Goal", dl([["Target", lbl("revenue_target", l.revenue_target)], ["Timeline", lbl("target_timeline", l.target_timeline)]])),
+      group("04", "Challenges", el("div", {},
+        ch.length ? el("div", { class: "admin-chips admin-chips--wrap" }, ch.map((c) => chip(c))) : el("p", { class: "drawer__muted", textContent: "None selected" }),
+        l.challenge_other ? el("blockquote", { class: "drawer__other" }, el("span", { class: "drawer__other-label", textContent: "Something else" }), el("p", { textContent: l.challenge_other })) : null)),
+    );
+  } else {
+    groups.push(group("02", "Project", dl([["Budget", l.budget]])));
+  }
+  groups.push(dl([
+    ["Received", fmtDate(l.created_at)],
+    l.service && l.service !== "not-sure" ? ["Came from", lbl("service", l.service)] : null,
+    ["Consent", l.consent ? "Yes" : "No"],
+  ]));
+  $("[data-d-groups]").replaceChildren(...groups);
+
+  // Older leads (from the previous contact form) only have a free-text message.
+  $("[data-d-legacy]").hidden = isConsultation(l) || !l.message;
   $("[data-d-message]").textContent = l.message || "";
   $("[data-d-status]").value = STATUSES.includes(l.status) ? l.status : "new";
   $("[data-d-notes]").value = l.notes || "";
-  $("[data-d-reply]").href = `mailto:${encodeURIComponent(l.email)}?subject=${encodeURIComponent(`Re: your project inquiry — ${l.company || ""}`.trim())}`;
   $("[data-d-status-msg]").textContent = "";
   drawer.hidden = false;
   document.body.classList.add("is-locked");
@@ -200,7 +240,7 @@ $("[data-d-save]").addEventListener("click", async (e) => {
 });
 
 /* ---- toolbar ----------------------------------------------------------- */
-["[data-search]", "[data-filter-status]", "[data-filter-service]"].forEach((s) => $(s).addEventListener("input", renderRows));
+["[data-search]", "[data-filter-status]", "[data-filter-revenue]", "[data-filter-timeline]"].forEach((s) => $(s).addEventListener("input", renderRows));
 $("[data-refresh]").addEventListener("click", load);
 $("[data-export]").addEventListener("click", () => {
   const cols = ["created_at", "name", "email", "phone", "company", "website", "service", "budget",

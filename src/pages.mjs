@@ -151,6 +151,7 @@ export function Admin() {
   const leadOptions = JSON.stringify({
     revenue_current: toMap(F.revenueCurrent.options), revenue_target: toMap(F.revenueTarget.options),
     target_timeline: toMap(F.timeline.options), challenges: toMap(F.challenges.options),
+    service: { ...Object.fromEntries(C.services.items.map((x) => [x.slug, x.title])), "not-sure": "Not sure yet" },
   }).replace(/</g, "\\u003c");
   return Document({
     title: `Leads | ${C.site.name} admin`, description: "Admin", path: "admin/", noindex: true, chrome: false,
@@ -192,12 +193,15 @@ export function Admin() {
           <ul class="admin-kpis" data-kpis></ul>
         </div>
         <div class="admin-toolbar">
-          <label class="admin-search">${icon("search", 16)}<span class="visually-hidden">Search leads</span><input type="search" placeholder="Search name, email, brand, message" data-search></label>
+          <label class="admin-search">${icon("search", 16)}<span class="visually-hidden">Search leads</span><input type="search" placeholder="Search name, email, phone, brand" data-search></label>
           <div class="select select--compact"><label class="visually-hidden" for="filter-status">Status</label><select id="filter-status" data-filter-status>
             <option value="">All statuses</option>${statusOpts.map((s) => html`<option value="${s}">${s[0].toUpperCase() + s.slice(1)}</option>`)}
           </select>${icon("chevron", 14, "icon select__chevron")}</div>
-          <div class="select select--compact"><label class="visually-hidden" for="filter-service">Service</label><select id="filter-service" data-filter-service>
-            <option value="">All services</option>${C.services.items.map((s) => html`<option value="${s.slug}">${s.title}</option>`)}<option value="not-sure">Not sure yet</option>
+          <div class="select select--compact"><label class="visually-hidden" for="filter-revenue">Current revenue</label><select id="filter-revenue" data-filter-revenue>
+            <option value="">Any revenue now</option>${F.revenueCurrent.options.map((o) => html`<option value="${o.value}">${o.label}</option>`)}
+          </select>${icon("chevron", 14, "icon select__chevron")}</div>
+          <div class="select select--compact"><label class="visually-hidden" for="filter-timeline">Timeline</label><select id="filter-timeline" data-filter-timeline>
+            <option value="">Any timeline</option>${F.timeline.options.map((o) => html`<option value="${o.value}">${o.label}</option>`)}
           </select>${icon("chevron", 14, "icon select__chevron")}</div>
           <button class="btn btn--secondary btn--sm" type="button" data-refresh><span class="btn__label">Refresh</span>${icon("refresh", 16, "icon btn__icon")}</button>
           <button class="btn btn--primary btn--sm" type="button" data-export><span class="btn__label">Export CSV</span>${icon("download", 16, "icon btn__icon")}</button>
@@ -205,7 +209,7 @@ export function Admin() {
         <p class="admin-status" role="status" data-status></p>
         <div class="admin-table-wrap">
           <table class="admin-table">
-            <thead><tr><th scope="col">Received</th><th scope="col">Name</th><th scope="col">Brand</th><th scope="col">Service</th><th scope="col">Revenue / budget</th><th scope="col">Status</th></tr></thead>
+            <thead><tr><th scope="col">Received</th><th scope="col">Name</th><th scope="col">Brand</th><th scope="col">Revenue now</th><th scope="col">Target</th><th scope="col">Timeline</th><th scope="col">Challenges</th><th scope="col">Status</th></tr></thead>
             <tbody data-rows></tbody>
           </table>
         </div>
@@ -218,9 +222,12 @@ export function Admin() {
             <h2 class="h4" id="drawer-title" data-d-name></h2>
             <button class="square-btn" type="button" aria-label="Close" data-close>${icon("x", 20)}</button>
           </div>
-          <dl class="drawer__meta" data-d-meta></dl>
-          <h3 class="drawer__label">Message</h3>
-          <p class="drawer__message" data-d-message></p>
+          <div class="drawer__contact" data-d-contact></div>
+          <div class="drawer__groups" data-d-groups></div>
+          <div class="drawer__legacy" data-d-legacy hidden>
+            <h3 class="drawer__label">Message</h3>
+            <p class="drawer__message" data-d-message></p>
+          </div>
           <div class="field">
             <label class="field__label" for="d-status">Status</label>
             <div class="select"><select id="d-status" data-d-status>${statusOpts.map((s) => html`<option value="${s}">${s[0].toUpperCase() + s.slice(1)}</option>`)}</select>${icon("chevron", 14, "icon select__chevron")}</div>
@@ -231,7 +238,6 @@ export function Admin() {
           </div>
           <div class="drawer__actions">
             <button class="btn btn--primary btn--md" type="button" data-d-save><span class="btn__label">Save</span>${icon("check", 16, "icon btn__icon")}</button>
-            <a class="text-link" data-d-reply href="#"><span class="text-link__label">Reply by email</span>${icon("mail", 16)}</a>
           </div>
           <p class="admin-status" role="status" data-d-status-msg></p>
         </aside>
