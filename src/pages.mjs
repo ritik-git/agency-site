@@ -25,7 +25,7 @@ export function Home() {
   ];
   return Document({
     title: C.site.seo.title, description: C.site.seo.description, onHome: true, ld,
-    body: html`${S.Hero()}${S.TrustStrip()}${S.Services()}${S.Work()}${S.Results()}${S.Process()}${S.WhyUs()}${S.Founder()}${S.Testimonials()}${S.Contact()}`,
+    body: html`${S.Hero()}${S.TrustStrip()}${S.Showcase()}${S.Services()}${S.Work()}${S.Results()}${S.Process()}${S.WhyUs()}${S.Founder()}${S.Testimonials()}${S.Contact()}`,
   });
 }
 
@@ -134,7 +134,7 @@ export function NotFound() {
         <div class="not-found__links">
           ${Button({ label: "Back home", href: url(""), size: "lg" })}
           ${TextLink({ label: "See the work", href: url("#work") })}
-          ${TextLink({ label: "Start a project", href: url("#contact") })}
+          ${TextLink({ label: "Speak to our team today", href: url("#contact") })}
         </div>
       </div>
       <div class="not-found__frames" aria-hidden="true"><span>9:16</span><span>1:1</span><span>16:9</span></div>

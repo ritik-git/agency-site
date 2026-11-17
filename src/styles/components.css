@@ -331,3 +331,5 @@
 @media (min-width: 640px) { .has-action-bar .site-footer { padding-bottom: calc(var(--space-8) + 72px); } }
 @media (min-width: 768px)  { .logo-marquee { --logo-h: 28px; --logo-gap: 64px; --logo-max-w: 148px; --marquee-fade: 8%; } }
 @media (min-width: 1280px) { .logo-marquee { --logo-h: 32px; --logo-gap: 88px; --logo-max-w: 168px; } }
+.text-link--accent { color: var(--color-accent-text); }
+.text-link--accent:hover, .text-link--accent:focus-visible { color: var(--color-accent-hover); }

@@ -1,6 +1,6 @@
 /* Tiny, dependency-free templating core.
    html`` auto-escapes interpolations; nest html`` results or arrays freely. */
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -71,6 +71,9 @@ const ICONS = {
   "arrow-right": '<path d="M5 12h14M13 6l6 6-6 6"/>',
   check: '<path d="M5 12.5 10 17 19 7"/>',
   x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  expand: '<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>',
+  "zoom-in": '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.4-4.4M11 8v6M8 11h6"/>',
+  "zoom-out": '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.4-4.4M8 11h6"/>',
   alert: '<path d="M12 3 2 20h20L12 3zM12 10v4M12 17.5v.01"/>',
   chevron: '<path d="M6 9l6 6 6-6"/>',
   mail: '<path d="M3 5h18v14H3zM3 6l9 7 9-7"/>',
@@ -114,6 +117,9 @@ export function picture(name, { alt = "", sizes = "100vw", eager = false, cls = 
     )}>
   </picture>`;
 }
+export const hasImage = (name) => Boolean(manifest[name]);
+export const imageMeta = (name) => manifest[name] || null;
+export const staticFile = (rel) => existsSync(path.join(ROOT, "static", rel));
 export const imageSrc = (name, w) => asset(`img/${name}-${w}.webp`);
 
 /** Intrinsic { w, h } of an SVG, PNG, JPEG or WebP file (from its header), or {} if unknown. */

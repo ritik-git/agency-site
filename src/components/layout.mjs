@@ -15,7 +15,7 @@ export function SiteHeader({ onHome }) {
           ${nav.map((n) => html`<li><a class="nav-link" href="${navHref(n.href, onHome)}" data-nav-link>${n.label}</a></li>`)}
         </ul>
       </nav>
-      ${Button({ label: "Start a project", href: navHref("#contact", onHome), size: "sm", cls: "site-header__cta" })}
+      ${Button({ label: "Speak to our team today", href: navHref("#contact", onHome), size: "sm", cls: "site-header__cta" })}
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
         <span class="visually-hidden" data-menu-label>Open menu</span>
         <span class="menu-toggle__bar" aria-hidden="true"></span>
@@ -46,7 +46,7 @@ export function MobileMenu({ onHome }) {
         </ol>
       </nav>
       <div class="mobile-menu__foot">
-        ${Button({ label: "Start a project", href: navHref("#contact", onHome), size: "lg", cls: "btn--block", attrs: raw("data-menu-link") })}
+        ${Button({ label: "Speak to our team today", href: navHref("#contact", onHome), size: "lg", cls: "btn--block", attrs: raw("data-menu-link") })}
         <p class="mobile-menu__meta">${site.email ? html`<a href="mailto:${site.email}">${site.email}</a>` : ph(null, "EMAIL")}</p>
         <ul class="mobile-menu__socials">${Socials()}</ul>
       </div>
@@ -59,7 +59,7 @@ export function SiteFooter({ onHome }) {
     <div class="container">
       <div class="site-footer__cta" data-reveal>
         <p class="h3">${footerContent.cta}</p>
-        ${Button({ label: "Start a project", href: navHref("#contact", onHome), size: "lg" })}
+        ${Button({ label: "Speak to our team today", href: navHref("#contact", onHome), size: "lg" })}
       </div>
       <div class="site-footer__cols">
         <div class="footer-col">
@@ -68,7 +68,7 @@ export function SiteFooter({ onHome }) {
         </div>
         <div class="footer-col">
           <h2 class="footer-col__title">Services</h2>
-          <ul>${services.items.map((s) => html`<li><a href="${navHref("#service-" + s.slug, onHome)}">${s.title}</a></li>`)}</ul>
+          <ul>${services.items.map((s) => html`<li><a href="${navHref("#reel", onHome)}">${s.title}</a></li>`)}</ul>
         </div>
         <div class="footer-col">
           <h2 class="footer-col__title">Contact</h2>
@@ -96,6 +96,9 @@ export function SiteFooter({ onHome }) {
 function jsonLd(data) {
   return raw(`<script type="application/ld+json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`);
 }
+
+/* Cache-busting: ?v=<hash of the built CSS+JS>, so browsers fetch fresh files after every change. */
+const ver = () => (ctx.version ? `?v=${ctx.version}` : "");
 
 export function Document({ title, description, path = "", onHome = false, noindex = false, ld = [], body, bodyClass = "", scripts = ["main.js"], styles = ["site.css"], chrome = true }) {
   const canonical = (ctx.siteUrl || site.url) + url(path);
@@ -125,7 +128,7 @@ ${noindex || !isProd() ? raw('<meta name="robots" content="noindex">') : ""}
 <link rel="manifest" href="${url("site.webmanifest")}">
 <link rel="preload" href="${asset("fonts/inter-display-600.woff")}" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="${asset("fonts/inter-400.woff")}" as="font" type="font/woff" crossorigin>
-${styles.map((s) => html`<link rel="stylesheet" href="${asset(s)}">`)}
+${styles.map((s) => html`<link rel="stylesheet" href="${asset(s) + ver()}">`)}
 <script>document.documentElement.classList.replace("no-js","js");</script>
 ${ld.map(jsonLd)}
 </head>
@@ -141,7 +144,7 @@ ${ActionBar({
   whatsapp: site.whatsapp, lines: site.actionBar,
 })}
 ${MobileMenu({ onHome })}` : ""}
-${scripts.map((s) => html`<script type="module" src="${asset("js/" + s)}"></script>`)}
+${scripts.map((s) => html`<script type="module" src="${asset("js/" + s) + ver()}"></script>`)}
 </body>
 </html>`;
 }

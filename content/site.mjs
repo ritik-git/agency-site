@@ -61,7 +61,7 @@ export const hero = {
 };
 
 export const services = {
-  index: "01",
+  index: "02",
   label: "What we do",
   title: ["Five ways to", "win the", "scroll."],
   accentFrom: 1,
@@ -107,60 +107,101 @@ export const services = {
 };
 
 export const work = {
-  index: "02",
+  index: "03",
   label: "Selected work",
   title: ["Proof, not", "promises."],
   accentFrom: 1,
   aside: "A selection of recent campaigns — the idea, the format and what it moved.",
-  projects: [
+  // Ad reel: vertical video creatives shown under the Work heading. Files are produced by
+  // scripts/encode-reel.py → static/video/<slug>.mp4 + poster images <slug>-<w>.{avif,webp}.
+  // `tag` is the small label on the card; `alt` describes the poster frame. Reorder freely.
+  reel: {
+    label: "Ad creatives",
+    title: "The reel",
+    hint: "Hover to preview · click for sound",
+    hintTouch: "Tap to play with sound",
+    items: [
+      { slug: "reel-01", tag: "Product · Extresy", alt: "Hand holding a jewelled Extresy perfume bottle, priced at Rs. 699 for three luxury perfumes" },
+      { slug: "reel-02", tag: "UGC · Skincare", alt: "Creator close-up reviewing an invisible pimple patch" },
+      { slug: "reel-03", tag: "AI story", alt: "AI-generated mythological king in a snack shop with a soundbox, captioned in Hindi" },
+      { slug: "reel-04", tag: "AI story · Fintech", alt: "Worried woman reading a loan-rejected message, with a poor credit score gauge" },
+      { slug: "reel-05", tag: "Motion", alt: "Animated snack pack on lime green: two million dollars in sales with TikTok Shop" },
+      { slug: "reel-06", tag: "UGC", alt: "Creator in a sequinned saree presenting a product to camera" },
+      { slug: "reel-07", tag: "Talking head", alt: "Presenter at a podcast microphone talking to camera with captions" },
+      { slug: "reel-08", tag: "AI story", alt: "AI-generated courtroom scene with a man appealing to the judge" },
+      { slug: "reel-09", tag: "Story ad", alt: "Couple sitting with an older man in a living room" },
+      { slug: "reel-10", tag: "Product demo · grexa.ai", alt: "Smiling woman with a tablet, cut with a grexa.ai campaign dashboard" },
+      { slug: "reel-11", tag: "UGC · Skincare", alt: "Creator showing skin texture in a split-screen before-and-after" },
+      { slug: "reel-12", tag: "Talking head", alt: "Bearded presenter explaining TikTok Shop to camera" },
+      { slug: "reel-13", tag: "Motion", alt: "Kinetic type ad: struggling to turn views into money" },
+    ],
+  },
+  // Case studies (title, client, result, images, page under /work/<slug>/). None yet — the Work section
+  // shows the ad reel only. Add entries here when real case studies are ready.
+  projects: [],
+};
+
+export const showcase = {
+  index: "01",
+  label: "Campaign showcase",
+  title: ["Real campaigns.", "Real numbers.", "Real growth."],
+  accentFrom: 2,
+  aside: "A closer look at the campaigns, creatives and performance we've built alongside our clients.",
+  // One entry per screenshot. Prepare the image first:  python scripts/add-campaign-image.py <file> <slug>
+  // Every figure below is read straight off its screenshot — never add a number the screenshot doesn't show.
+  // Fields (all optional except slug/alt): client, industry, platform, type, period, metric {value, label},
+  // description, alt (what the screenshot shows, for screen readers).
+  campaigns: [
     {
-      slug: "project-alpha", isPlaceholder: true,
-      title: "Project Alpha", category: "AI", format: "9:16", platform: "Meta",
-      client: null, result: null, image: "project-alpha",
-      alt: "Chrome torus sculpture with lime light trails on a black studio background",
-      brief: null, idea: null, outcome: null, year: null,
+      slug: "campaign-01", client: "E-commerce brand", industry: "D2C", platform: "Shopify Analytics", type: "Store revenue",
+      period: "1 May – 16 Nov 2026", metric: { value: "₹8.15 Cr", label: "Total sales" },
+      description: "₹8.59 Cr gross sales across 1,14,531 orders, with sales climbing from May and peaking through July.",
+      alt: "Shopify analytics dashboard: total sales ₹8,15,94,276.20, gross sales ₹8,59,90,621, 1,14,531 orders, sales over time from May to October 2026",
     },
     {
-      slug: "project-beta", isPlaceholder: true,
-      title: "Project Beta", category: "UGC", format: "4:5", platform: "Instagram",
-      client: null, result: null, image: "project-beta",
-      alt: "Stacked liquid-chrome form reflecting lime light on black",
-      brief: null, idea: null, outcome: null, year: null,
+      slug: "campaign-02", client: "E-commerce brand", industry: "D2C", platform: "Meta Ads", type: "Purchase campaigns",
+      period: "Last 30 days from 17 Oct 2026", metric: { value: "16.01×", label: "Average purchase ROAS" },
+      description: "Seven campaigns: $1,249.88 spent for $20,012.32 in purchase value — 3,669 purchases at $0.34 each.",
+      alt: "Meta Ads Manager table of 7 campaigns: $1,249.88 spent, $20,012.32 purchase conversion value, 3,669 purchases, $0.34 cost per purchase, 16.01 average ROAS",
     },
     {
-      slug: "project-gamma", isPlaceholder: true,
-      title: "Project Gamma", category: "Video", format: "16:9", platform: "YouTube",
-      client: null, result: null, image: "project-gamma",
-      alt: "Twisted chrome column lit by a lime strip light",
-      brief: null, idea: null, outcome: null, year: null,
+      slug: "campaign-03", client: "E-commerce brand", industry: "D2C", platform: "Shopify Analytics", type: "Store revenue",
+      period: "1 Jan – 16 Nov 2026", metric: { value: "₹31.47 L", label: "Total sales" },
+      description: "5,087 orders with 5,045 fulfilled, at an average order value of ₹618.76.",
+      alt: "Shopify analytics dashboard: total sales ₹3,147,682, 5,087 orders, 5,045 fulfilled, average order value ₹618.76",
     },
     {
-      slug: "project-delta", isPlaceholder: true,
-      title: "Project Delta", category: "Performance", format: "1:1", platform: "Meta",
-      client: null, result: null, image: "project-delta",
-      alt: "Perforated chrome sphere with lime reflections",
-      brief: null, idea: null, outcome: null, year: null,
+      slug: "campaign-04", client: "E-commerce brand", industry: "Skincare", platform: "Meta Ads", type: "Serum combo — purchase campaigns",
+      period: "17 Oct – 15 Nov 2026", metric: { value: "9.46×", label: "Average purchase ROAS" },
+      description: "$357.39 spent for $3,381.37 in purchase value — 643 purchases at $0.56 each.",
+      alt: "Meta Ads Manager table of serum combo campaigns: $357.39 spent, $3,381.37 purchase value, 643 purchases, $0.56 cost per purchase, 9.46 average ROAS",
+    },
+    {
+      slug: "campaign-05", client: "E-commerce brand", industry: "D2C", platform: "Shopify Orders", type: "Order log",
+      period: "26–27 September", metric: null,
+      description: "A day of ₹599 orders, every one prepaid, fulfilled and delivered. Customer names are blurred for privacy.",
+      alt: "Shopify orders list from 26–27 September: dozens of ₹599 orders marked paid, fulfilled and delivered; customer names blurred",
     },
   ],
 };
 
 export const results = {
-  index: "03",
+  index: "04",
   label: "The intent",
   title: ["Ideas are the", "means.", "Growth is", "the point."],
   accentFrom: 2,
   aside: null, // e.g. "We measure every creative against the metric you care about — CPA, ROAS or thumb-stop rate."
   statement: "Every concept we ship is tied to a number you care about.",
   stats: [
-    { value: null, suffix: "%", label: "Average lift in click-through rate" },
-    { value: null, suffix: "+", label: "Ad creatives delivered" },
-    { value: null, suffix: "+", label: "Brands served" },
-    { value: null, suffix: "%", label: "Clients who come back" },
+    { value: 3, suffix: "%+", label: "Average lift in click-through rate" },
+    { value: 10000, suffix: "+", label: "Ad creatives delivered" },
+    { value: 20, suffix: "+", label: "Brands scaled successfully" },
+    { value: 50, suffix: "+ Cr", label: "Revenue generated for clients" },
   ],
 };
 
 export const process = {
-  index: "04",
+  index: "05",
   label: "How we work",
   title: ["Brief to", "breakthrough."],
   accentFrom: 1,
@@ -175,7 +216,7 @@ export const process = {
 };
 
 export const why = {
-  index: "05",
+  index: "06",
   label: "The difference",
   title: ["Why brands", "choose us."],
   accentFrom: 1,
@@ -189,7 +230,7 @@ export const why = {
 };
 
 export const founder = {
-  index: "06",
+  index: "07",
   label: "The team",
   title: ["Built by", "creators, for", "growth-minded", "brands."],
   accentFrom: 2,
@@ -206,7 +247,7 @@ export const founder = {
 };
 
 export const testimonials = {
-  index: "07",
+  index: "08",
   label: "What clients say",
   title: ["Good work gets", "talked about."],
   accentFrom: 1,
@@ -233,24 +274,21 @@ export const trust = {
     { name: "Vritus Australia", src: "logos/vritus-australia.png", scale: 1.35, brightness: 1.2 },
     { name: "Extresy", src: "logos/extresy.png", tone: "light", scale: 0.8 },
     { name: "Virgin Thread", src: "logos/virgin-thread.png", tone: "light", scale: 1.3 },
-    { name: "Solarhood", src: "logos/solarhood.webp", tone: "light", scale: 1.1 },
+    { name: "Solarhood", src: "logos/solarhood.webp", tone: "lift", scale: 1.1 },
+    { name: "Healcure", src: "logos/healcure.webp", scale: 1.15 },
+    { name: "MAC Cosmetics", src: "logos/mac.png", scale: 1.1 },
     { name: "Capt. Zack", src: "logos/capt-zack.png", scale: 1.4, brightness: 0.85 },
     { name: "Moodcare", src: "logos/moodcare.png", tone: "lift", scale: 0.95 },
     { name: "Avimee Herbal", src: "logos/avimee-herbal.png", tone: "light", scale: 1.2 },
     { name: "Goldy's Flower", src: "logos/goldys-flower.png", scale: 1.4, brightness: 1.9 },
     { name: "Hidden", src: "logos/hidden.png", scale: 1.25, brightness: 1.5 },
     { name: "Candid", src: "logos/candid.png", scale: 1.3 },
-    // Still placeholders — shown in preview builds only, left out of production until real files are added:
-    { name: "Greenveda", src: "logos/greenveda.svg" },
-    { name: "MACC", src: "logos/macc.svg" },
-    { name: "Jiva Herbals", src: "logos/jiva-herbals.svg" },
-    { name: "Tarella Exotica", src: "logos/tarella-exotica.svg" },
   ],
 };
 
 export const contact = {
-  index: "08",
-  label: "Start a project",
+  index: "09",
+  label: "Speak to our team today",
   title: ["Let's make", "something", "impossible", "to ignore."],
   accentFrom: 2,
   nextSteps: [

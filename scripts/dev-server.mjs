@@ -14,7 +14,7 @@ import crypto from "node:crypto";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../dist");
 const PORT = Number(process.argv[2] || process.env.PORT || 8787);
 const ADMIN = { email: process.env.MOCK_ADMIN_EMAIL || "admin@example.com", password: process.env.MOCK_ADMIN_PASSWORD || "admin-pass" };
-const TYPES = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".avif": "image/avif", ".woff": "font/woff", ".woff2": "font/woff2", ".xml": "application/xml", ".txt": "text/plain", ".webmanifest": "application/manifest+json" };
+const TYPES = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript", ".json": "application/json", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp", ".avif": "image/avif", ".mp4": "video/mp4",".woff": "font/woff", ".woff2": "font/woff2", ".xml": "application/xml", ".txt": "text/plain", ".webmanifest": "application/manifest+json" };
 
 const leads = [];
 const tokens = new Map(); // access_token → email
@@ -97,7 +97,17 @@ http.createServer(async (req, res) => {
   try {
     if ((await stat(file)).isDirectory()) file = path.join(file, "index.html");
     const data = await readFile(file);
-    res.writeHead(200, { "Content-Type": TYPES[path.extname(file)] || "application/octet-stream" });
+    const type = TYPES[path.extname(file)] || "application/octet-stream";
+    // Byte ranges, like GitHub Pages: lets <video> start streaming and seek before the whole file arrives.
+    const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || "");
+    if (m && (m[1] || m[2])) {
+      const start = m[1] ? +m[1] : Math.max(0, data.length - +m[2]);
+      const end = m[1] && m[2] ? Math.min(+m[2], data.length - 1) : data.length - 1;
+      if (start > end) { res.writeHead(416, { "Content-Range": `bytes */${data.length}` }); return res.end(); }
+      res.writeHead(206, { "Content-Type": type, "Accept-Ranges": "bytes", "Content-Range": `bytes ${start}-${end}/${data.length}`, "Content-Length": end - start + 1 });
+      return res.end(data.subarray(start, end + 1));
+    }
+    res.writeHead(200, { "Content-Type": type, "Accept-Ranges": "bytes", "Content-Length": data.length });
     res.end(data);
   } catch {
     res.writeHead(404, { "Content-Type": TYPES[".html"] });

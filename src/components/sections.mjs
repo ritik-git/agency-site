@@ -1,7 +1,8 @@
 /* Home page sections — blueprint §8.2–§8.11 */
-import { html, chars, raw, url, icon, lines, ph, real, isProd, picture, imageSrc, photo } from "../lib/core.mjs";
+import { html, chars, raw, url, asset, icon, lines, ph, real, isProd, picture, imageSrc, photo, hasImage, staticFile } from "../lib/core.mjs";
 import { Button, TextLink, Eyebrow, Tag, FormatBadge, Section, SectionHeader, ChoiceGroup } from "./ui.mjs";
 import { LogoMarquee, resolveLogos } from "./logo-marquee.mjs";
+import { CampaignShowcase } from "./showcase.mjs";
 import * as C from "../../content/site.mjs";
 
 const pad = (n) => String(n).padStart(2, "0");
@@ -26,7 +27,7 @@ export function Hero() {
         <h1 class="display-1" id="hero-title" ${chars(h.title)} data-line-reveal data-immediate>${lines(h.title, h.accentFrom)}</h1>
         <p class="lead hero__lead" data-hero-fade>${h.lead}</p>
         <div class="hero__ctas" data-hero-fade>
-          ${Button({ label: "Start a project", href: "#contact", size: "lg" })}
+          ${Button({ label: "Speak to our team today", href: "#contact", size: "lg" })}
           ${TextLink({ label: "See the work", href: "#work", iconName: "arrow-down-right" })}
         </div>
         <p class="hero__micro" data-hero-fade>${h.micro}</p>
@@ -92,7 +93,7 @@ export function Services() {
       ${SectionHeader({ id: "services-title", ...s, aside: html`<p class="lead">${s.aside}</p>` })}
       <ol class="service-list" data-service-list>
         ${s.items.map((item, i) => html`<li class="service-item" id="service-${item.slug}" data-reveal>
-          <a class="service-row" href="?service=${item.slug}#contact" data-preview="${imageSrc(item.preview, 480)}">
+          <a class="service-row" href="#reel">
             <span class="service-row__num">${pad(i + 1)}</span>
             <h3 class="service-row__title"><span>${item.title}</span></h3>
             <div class="service-row__body">
@@ -100,12 +101,11 @@ export function Services() {
               <ul class="tags" aria-label="Deliverables">${item.tags.map(Tag)}</ul>
             </div>
             <span class="icon-box" aria-hidden="true">${icon("arrow-up-right", 20)}</span>
-            <span class="visually-hidden">— enquire about ${item.title}</span>
+            <span class="visually-hidden">— see our ad creatives</span>
           </a>
         </li>`)}
       </ol>
-    </div>
-    <div class="service-preview" aria-hidden="true" data-service-preview><img alt="" width="240" height="427" decoding="async"><span class="service-preview__badge">9:16</span></div>`,
+    </div>`,
   });
 }
 
@@ -142,6 +142,33 @@ export function ProjectCard(p, i, { headingLevel = 3 } = {}) {
   </article>`;
 }
 
+/* Ad reel: a scroll-snap strip of 9:16 poster cards. No <video> ships in the HTML — reel.js
+   creates ONE shared player on hover/tap and unloads it again (see src/scripts/reel.js). */
+export function Reel(r) {
+  const items = (r?.items || []).filter((it) => staticFile(`video/${it.slug}.mp4`) && hasImage(it.slug));
+  if (!items.length) return "";
+  const sizes = "(min-width:1024px) 248px, (min-width:640px) 34vw, 64vw";
+  return html`<div class="reel" id="reel" data-reel>
+    <div class="reel__bar">
+      <p class="eyebrow"><span class="eyebrow__index">${r.title}</span> / ${r.label}</p>
+      <p class="reel__hint"><span class="reel__hint--fine">${r.hint}</span><span class="reel__hint--touch">${r.hintTouch}</span></p>
+      <div class="reel__nav">
+        <button class="icon-box" type="button" data-reel-prev aria-label="Previous creatives">${icon("arrow-left", 20)}</button>
+        <button class="icon-box" type="button" data-reel-next aria-label="Next creatives">${icon("arrow-right", 20)}</button>
+      </div>
+    </div>
+    <ul class="reel__track" data-reel-track aria-label="${r.title}">
+      ${items.map((it, i) => html`<li class="reel-card" data-video="${asset(`video/${it.slug}.mp4`)}">
+        ${picture(it.slug, { alt: "", sizes, imgCls: "reel-card__poster" })}
+        <button class="reel-card__btn" type="button" aria-label="Play ad ${i + 1}: ${it.alt}">
+          <span class="reel-card__tag">${it.tag}</span>
+          <span class="reel-card__play" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></span>
+        </button>
+      </li>`)}
+    </ul>
+  </div>`;
+}
+
 export function Work() {
   const w = C.work;
   const projects = real(w.projects);
@@ -149,9 +176,10 @@ export function Work() {
     id: "work", theme: "surface-1", labelledBy: "work-title", cls: "work",
     children: html`<div class="container container--wide">
       <div class="work__head">${SectionHeader({ id: "work-title", ...w, aside: html`<p class="lead">${w.aside}</p>` })}</div>
+      ${Reel(w.reel)}
       ${projects.length
         ? html`<div class="project-grid">${projects.map((p, i) => ProjectCard(p, i))}</div>`
-        : html`<div class="work__empty" data-reveal>
+        : w.reel?.items?.length ? "" : html`<div class="work__empty" data-reveal>
             <p class="h4">Case studies are being written up.</p>
             <p class="lead">Ask us for recent examples in your category — we'll share what we can.</p>
           </div>`}
@@ -159,6 +187,9 @@ export function Work() {
     </div>`,
   });
 }
+
+/* ------------------------------------------------------------ SHOWCASE */
+export const Showcase = () => CampaignShowcase(C.showcase);
 
 /* ------------------------------------------------------------- RESULTS */
 export function Stat(s) {
@@ -179,7 +210,7 @@ export function StatsRow(stats) {
 
 export function Results() {
   const r = C.results;
-  const aside = html`<p class="lead">${r.aside ?? r.statement}</p>${!r.aside && !isProd() ? html`<p class="note">${ph(null, "HOW RESULTS ARE MEASURED")}</p>` : ""}`;
+  const aside = html`<p class="lead">${r.aside ?? r.statement}</p><p class="note">${TextLink({ label: "Why brands want to work with us", href: "#about", cls: "text-link--accent" })}</p>`;
   return Section({
     labelledBy: "results-title", cls: "results",
     children: html`<div class="container">
@@ -219,7 +250,7 @@ export function WhyUs() {
       <div class="split__sticky">
         ${Eyebrow(w)}
         <h2 class="display-2" id="why-title" ${chars(w.title)} data-line-reveal>${lines(w.title, w.accentFrom)}</h2>
-        <div class="why__cta" data-reveal>${TextLink({ label: "Start a project", href: "#contact" })}</div>
+        <div class="why__cta" data-reveal>${TextLink({ label: "Speak to our team today", href: "#contact" })}</div>
       </div>
       <ul class="why-list">
         ${w.items.map((it, i) => html`<li class="why-item" data-reveal>

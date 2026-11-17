@@ -1,50 +1,6 @@
-// Services cursor preview (C4/M9), project video hover (M10), count-up (M11),
+// Project video hover (M10), count-up (M11),
 // process progress (C8/M12), marquee visibility pause (M8).
 import { $, $$, once, reducedMotion, finePointer } from "./utils.js";
-
-/* ---- Services: cursor-following 9:16 preview ------------------------- */
-export function initServicePreview() {
-  const list = $("[data-service-list]");
-  const box = $("[data-service-preview]");
-  if (!list || !box) return;
-  const img = $("img", box);
-  const enabled = () => finePointer() && !reducedMotion() && window.innerWidth >= 1100;
-  let tx = 0, ty = 0, x = 0, y = 0, raf = 0, active = false;
-  const H = 427;
-  const loop = () => {
-    x += (tx - x) * 0.15;
-    y += (ty - y) * 0.15;
-    box.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
-    raf = active || Math.abs(tx - x) + Math.abs(ty - y) > 0.5 ? requestAnimationFrame(loop) : 0;
-  };
-  const place = (e, snap) => {
-    // keep the preview inside the viewport
-    tx = Math.min(e.clientX + 24, window.innerWidth - 240 - 16);
-    ty = Math.max(16, Math.min(e.clientY - H / 2, window.innerHeight - H - 16));
-    if (snap) { x = tx; y = ty; }
-    if (!raf) raf = requestAnimationFrame(loop);
-  };
-  let px = 0, py = 0;
-  const show = (row, e, snap) => {
-    const src = row.dataset.preview;
-    if (img.getAttribute("src") !== src) img.src = src; // lazy: loaded only on hover intent
-    active = true;
-    place(e, snap);
-    box.classList.add("is-visible");
-  };
-  const hide = () => { active = false; box.classList.remove("is-visible"); };
-  $$(".service-row", list).forEach((row) => {
-    row.addEventListener("pointerenter", (e) => { if (enabled() && e.pointerType === "mouse") show(row, e, !active); });
-  });
-  list.addEventListener("pointermove", (e) => { px = e.clientX; py = e.clientY; if (active) place(e); });
-  list.addEventListener("pointerleave", hide);
-  // While wheel-scrolling, the list moves under a still pointer: re-check which row is beneath it
-  window.addEventListener("scroll", () => {
-    if (!active) return;
-    const row = document.elementFromPoint(px, py)?.closest(".service-row");
-    row && list.contains(row) ? show(row, { clientX: px, clientY: py }) : hide();
-  }, { passive: true });
-}
 
 /* ---- Work: muted video on hover/focus (only if a project has one) ---- */
 export function initProjectVideos() {

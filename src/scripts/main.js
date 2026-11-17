@@ -3,11 +3,13 @@
 import { initHeader, initMobileMenu } from "./nav.js";
 import { initReveals } from "./reveal.js";
 import { initHero } from "./hero.js";
-import { initServicePreview, initProjectVideos, initCountUp, initProcess, initMarquee, initActionBar } from "./interactions.js";
+import { initProjectVideos, initCountUp, initProcess, initMarquee, initActionBar } from "./interactions.js";
 import { initCarousel } from "./carousel.js";
 import { initContactForm } from "./contact.js";
+import { initReel } from "./reel.js";
+import { initShowcase } from "./showcase.js";
 
-[initHeader, initMobileMenu, initReveals, initHero, initServicePreview, initProjectVideos, initCountUp, initProcess, initMarquee, initActionBar, initCarousel, initContactForm]
+[initHeader, initMobileMenu, initReveals, initHero, initProjectVideos, initCountUp, initProcess, initMarquee, initActionBar, initCarousel, initReel, initShowcase, initContactForm]
   .forEach((fn) => {
     try { fn(); } catch (err) { console.error(`[${fn.name}]`, err); }
   });

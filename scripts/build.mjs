@@ -27,6 +27,8 @@ cpSync(path.join(ROOT, "static/fonts"), path.join(DIST, "assets/fonts"), { recur
 cpSync(path.join(ROOT, "static/img"), path.join(DIST, "assets/img"), { recursive: true, filter: (s) => !s.endsWith("manifest.json") });
 cpSync(path.join(ROOT, "static/icons"), path.join(DIST, "assets/icons"), { recursive: true });
 if (existsSync(path.join(ROOT, "static/logos"))) cpSync(path.join(ROOT, "static/logos"), path.join(DIST, "assets/logos"), { recursive: true, filter: (s) => !s.endsWith(".md") });
+if (existsSync(path.join(ROOT, "static/campaigns"))) cpSync(path.join(ROOT, "static/campaigns"), path.join(DIST, "assets/campaigns"), { recursive: true });
+if (existsSync(path.join(ROOT, "static/video"))) cpSync(path.join(ROOT, "static/video"), path.join(DIST, "assets/video"), { recursive: true });
 cpSync(path.join(ROOT, "static/og-image.jpg"), path.join(DIST, "og-image.jpg"));
 out("assets/icons/favicon.svg",
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#050505"/><rect x="4" y="4" width="24" height="24" fill="#C7FF2F"/><path d="M10.2 23.5 14.9 9.5h2.3l4.7 14h-2.6l-1.1-3.4h-4.7l-1.1 3.4zm4.3-5.6h3.1L16 13.1z" fill="#070707"/></svg>`);
@@ -38,8 +40,20 @@ const siteCss = cssOrder.map((n) => readFileSync(path.join(ROOT, `src/styles/${n
 out("assets/site.css", minify(siteCss));
 out("assets/admin.css", minify(readFileSync(path.join(ROOT, "src/styles/admin.css"), "utf8")));
 
+/* ---- Asset version for cache-busting (hash of all CSS + JS sources) ---- */
+{
+  const { createHash } = await import("node:crypto");
+  const h = createHash("sha1").update(siteCss);
+  for (const f of readdirSync(path.join(ROOT, "src/scripts")).sort()) h.update(readFileSync(path.join(ROOT, "src/scripts", f)));
+  ctx.version = h.digest("hex").slice(0, 10);
+}
+
 /* ---- JS: native ES modules, copied as-is ---- */
-for (const f of readdirSync(path.join(ROOT, "src/scripts"))) cpSync(path.join(ROOT, "src/scripts", f), path.join(DIST, "assets/js", f));
+for (const f of readdirSync(path.join(ROOT, "src/scripts"))) {
+  // Version the relative imports too, so a changed module is never served from a stale cache.
+  const code = readFileSync(path.join(ROOT, "src/scripts", f), "utf8").replace(/(from\s+["']\.\/[\w-]+\.js)(["'])/g, `$1?v=${ctx.version}$2`);
+  out(`assets/js/${f}`, code);
+}
 out("assets/js/config.js",
   `// Generated at build time — public values only (the anon key is designed to be public; RLS protects data).\n` +
   `export const SUPABASE_URL = ${JSON.stringify(process.env.SUPABASE_URL || "")};\n` +
