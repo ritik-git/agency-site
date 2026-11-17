@@ -28,7 +28,7 @@ jobs:
       - name: Build site
         run: node scripts/build.mjs
         env:
-          MODE: ${{ vars.MODE || 'preview' }}            # set repo variable MODE=production at launch
+          MODE: ${{ vars.MODE || 'production' }}         # live site hides placeholders; set repo variable MODE=preview to show them
           STRICT: ${{ vars.STRICT }}                     # STRICT=1 fails the build if placeholders remain
           BASE_PATH: ${{ steps.pages.outputs.base_path }}/
           SITE_URL: ${{ vars.SITE_URL || steps.pages.outputs.origin }}

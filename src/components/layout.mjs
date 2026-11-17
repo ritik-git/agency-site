@@ -55,6 +55,15 @@ export function MobileMenu({ onHome }) {
 }
 
 export function SiteFooter({ onHome }) {
+  // Contact + Social columns list only what exists; in production an empty column is left out entirely.
+  const wa = site.whatsapp ? site.whatsapp.replace(/\D/g, "") : "";
+  const footerContact = [
+    site.email ? html`<li><a href="mailto:${site.email}">${site.email}</a></li>` : isProd() ? "" : html`<li>${ph(null, "EMAIL")}</li>`,
+    site.phone ? html`<li><a href="tel:${site.phone.replace(/\s/g, "")}">${site.phone}</a></li>` : "",
+    wa ? html`<li><a href="https://wa.me/${wa}" rel="noopener" target="_blank">WhatsApp · ${site.whatsapp}</a></li>` : "",
+    site.location ? html`<li>${site.location}</li>` : isProd() ? "" : html`<li>${ph(null, "CITY, COUNTRY")}</li>`,
+  ].filter(Boolean);
+  const socials = Socials();
   return html`<footer class="site-footer" data-theme="dark">
     <div class="container">
       <div class="site-footer__cta" data-reveal>
@@ -70,18 +79,14 @@ export function SiteFooter({ onHome }) {
           <h2 class="footer-col__title">Services</h2>
           <ul>${services.items.map((s) => html`<li><a href="${navHref("#reel", onHome)}">${s.title}</a></li>`)}</ul>
         </div>
-        <div class="footer-col">
+        ${footerContact.length ? html`<div class="footer-col">
           <h2 class="footer-col__title">Contact</h2>
-          <ul>
-            <li>${site.email ? html`<a href="mailto:${site.email}">${site.email}</a>` : ph(null, "EMAIL")}</li>
-            ${site.phone ? html`<li><a href="tel:${site.phone.replace(/\s/g, "")}">${site.phone}</a></li>` : ""}
-            <li>${ph(site.location, "CITY, COUNTRY")}</li>
-          </ul>
-        </div>
-        <div class="footer-col">
+          <ul>${footerContact}</ul>
+        </div>` : ""}
+        ${socials.length ? html`<div class="footer-col">
           <h2 class="footer-col__title">Social</h2>
-          <ul>${Socials()}</ul>
-        </div>
+          <ul>${socials}</ul>
+        </div>` : ""}
       </div>
     </div>
     <div class="site-footer__wordmark" aria-hidden="true" ${chars([site.name])}><span class="accent">${site.name[0]}</span>${site.name.slice(1)}</div>

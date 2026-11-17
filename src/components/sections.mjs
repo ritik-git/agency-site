@@ -329,6 +329,9 @@ export function Testimonials() {
 }
 
 /* ------------------------------------------------------------- CONTACT */
+/* Contact follows Testimonials; when Testimonials is hidden (no real quotes yet) it takes that number. */
+const contactIndex = () => (real(C.testimonials.items).length ? C.contact.index : pad(Number(C.contact.index) - 1));
+
 export function Contact() {
   const c = C.contact;
   const field = (id, label, input, { full = false, hint = "" } = {}) => html`<div class="field ${full ? "field--full" : ""}" data-field>
@@ -367,14 +370,14 @@ export function Contact() {
     id: "contact", theme: "surface-2", labelledBy: "contact-title", cls: "contact",
     children: html`<div class="container split">
       <div class="split__sticky">
-        ${Eyebrow(c)}
+        ${Eyebrow({ ...c, index: contactIndex() })}
         <h2 class="display-2" id="contact-title" ${chars(c.title)} data-line-reveal>${lines(c.title, c.accentFrom)}</h2>
         <ol class="next-steps" aria-label="What happens next" data-reveal>
           ${c.nextSteps.map((s, i) => html`<li><span class="next-steps__num">${pad(i + 1)}</span>${s}</li>`)}
         </ol>
-        <p class="contact__alt" data-reveal>Prefer email? ${
+        ${C.site.email || !isProd() ? html`<p class="contact__alt" data-reveal>Prefer email? ${
           C.site.email ? TextLink({ label: C.site.email, href: `mailto:${C.site.email}`, iconName: "mail" }) : ph(null, "HELLO@YOURDOMAIN.COM")
-        }</p>
+        }</p>` : ""}
       </div>
       <div class="contact__form-wrap" data-reveal>
         <form class="contact-form" novalidate data-contact-form>
