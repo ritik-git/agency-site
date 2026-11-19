@@ -222,6 +222,12 @@
   .logo-marquee__item:hover .logo-marquee__img { filter: grayscale(0); opacity: 1; transform: scale(1.06); }
   .logo-marquee__item[data-tone="light"]:hover .logo-marquee__img { filter: grayscale(1) brightness(0) invert(1); }
 }
+/* Phones have no hover, so on mobile-width screens every logo shows its hovered (full-colour) state all the time.
+   Dark-ink "light" logos keep their light silhouette so they stay visible on the dark background. */
+@media (max-width: 767px) {
+  .logo-marquee__img, .logo-marquee__item[data-tone="lift"] .logo-marquee__img { filter: grayscale(0); opacity: 1; }
+  .logo-marquee__item[data-tone="light"] .logo-marquee__img { filter: grayscale(1) brightness(0) invert(1); opacity: 1; }
+}
 @keyframes logo-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
 /* ---- Action bar (components/action-bar.mjs) ------------------------------
