@@ -29,7 +29,7 @@ function Socials() {
   const list = site.socials.filter((s) => s.href || !isProd());
   return list.map((s) =>
     s.href
-      ? html`<li><a class="social-link" href="${s.href}" rel="noopener" target="_blank">${s.label}</a></li>`
+      ? html`<li><a class="social-link" href="${s.href}" rel="noopener" target="_blank">${s.label}${s.handle ? ` · ${s.handle}` : ""}</a></li>`
       : html`<li><span class="social-link social-link--missing">${s.label} ${ph(null, "URL")}</span></li>`
   );
 }
@@ -58,7 +58,8 @@ export function SiteFooter({ onHome }) {
   // Contact + Social columns list only what exists; in production an empty column is left out entirely.
   const wa = site.whatsapp ? site.whatsapp.replace(/\D/g, "") : "";
   const footerContact = [
-    site.email ? html`<li><a href="mailto:${site.email}">${site.email}</a></li>` : isProd() ? "" : html`<li>${ph(null, "EMAIL")}</li>`,
+    // <wbr> after the @ so a long address wraps there instead of mid-word in a narrow column.
+    site.email ? html`<li><a href="mailto:${site.email}">${raw(site.email.split("@").map((p) => html`${p}`).join("@<wbr>"))}</a></li>` : isProd() ? "" : html`<li>${ph(null, "EMAIL")}</li>`,
     site.phone ? html`<li><a href="tel:${site.phone.replace(/\s/g, "")}">${site.phone}</a></li>` : "",
     wa ? html`<li><a href="https://wa.me/${wa}" rel="noopener" target="_blank">WhatsApp · ${site.whatsapp}</a></li>` : "",
     site.location ? html`<li>${site.location}</li>` : isProd() ? "" : html`<li>${ph(null, "CITY, COUNTRY")}</li>`,
@@ -77,7 +78,7 @@ export function SiteFooter({ onHome }) {
         </div>
         <div class="footer-col">
           <h2 class="footer-col__title">Services</h2>
-          <ul>${services.items.map((s) => html`<li><a href="${navHref("#reel", onHome)}">${s.title}</a></li>`)}</ul>
+          <ul>${[...services.items.map((s) => s.title), ...(footerContent.extraServices || [])].map((t) => html`<li><a href="${navHref("#reel", onHome)}">${t}</a></li>`)}</ul>
         </div>
         ${footerContact.length ? html`<div class="footer-col">
           <h2 class="footer-col__title">Contact</h2>
@@ -96,6 +97,28 @@ export function SiteFooter({ onHome }) {
       ${TextLink({ label: "Back to top", href: "#top", iconName: "arrow-up" })}
     </div></div>
   </footer>`;
+}
+
+/* Meta Pixel base code (as supplied by Meta), with the pixel id taken from content/site.mjs. */
+function MetaPixel(id) {
+  const pid = String(id).replace(/\D/g, "");
+  return raw(`<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '${pid}');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=${pid}&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->`);
 }
 
 function jsonLd(data) {
@@ -136,6 +159,7 @@ ${noindex || !isProd() ? raw('<meta name="robots" content="noindex">') : ""}
 ${styles.map((s) => html`<link rel="stylesheet" href="${asset(s) + ver()}">`)}
 <script>document.documentElement.classList.replace("no-js","js");</script>
 ${ld.map(jsonLd)}
+${chrome && isProd() && site.metaPixelId ? MetaPixel(site.metaPixelId) : ""}
 </head>
 <body class="${bodyClass}${chrome ? " has-action-bar" : ""}" id="top">
 ${chrome ? html`<a class="skip-link" href="#main">Skip to content</a>

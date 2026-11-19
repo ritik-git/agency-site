@@ -13,7 +13,7 @@ export const site = {
   nameSuffix: "Media",
   legalName: "AdverBright Media",      // [CONFIRM]
   url: "https://example.github.io",    // [PLACEHOLDER] set SITE_URL at build time
-  email: null,                         // e.g. "hello@adverbright.com"
+  email: "adverbrightmedia@gmail.com",
   phone: null,                         // optional, e.g. "+91 98xxxxxxx"
   whatsapp: "+91 7000590736",          // sticky action bar → https://wa.me/<digits>; set null to hide that button
   // Sticky bar headline: rotates through these lines (~4s each). `accent` words show in lime,
@@ -27,9 +27,10 @@ export const site = {
   ],
   location: null,                      // e.g. "Indore, India"
   responseTime: "24 hours",            // [CONFIRM] promise shown in hero + contact
+  metaPixelId: "2122808599108432",     // Meta (Facebook) Pixel — loaded on production builds only; null to remove
   currency: "$",                       // [CONFIRM] reference uses USD; switch to "₹" for India
   socials: [
-    { label: "Instagram", href: null },
+    { label: "Instagram", handle: "@adverbrightmedia", href: "https://www.instagram.com/adverbrightmedia/" },
     { label: "LinkedIn", href: null },
     { label: "YouTube", href: null },
   ],
@@ -71,8 +72,8 @@ export const services = {
     {
       slug: "ai-ad-creatives",
       title: "AI Ad Creatives",
-      description: "High-volume static and carousel ads, art-directed by humans and produced with AI so you can test more ideas, faster.",
-      tags: ["Static ads", "Carousels", "Variations at scale"],
+      description: "Hyper-realistic static and video ads, art-directed by humans and produced with AI so you can test more ideas, faster.",
+      tags: ["Static ads", "Video ads", "Variations at scale"],
       preview: "service-ai",
     },
     {
@@ -121,8 +122,8 @@ export const work = {
     hint: "Hover to preview · click for sound",
     hintTouch: "Tap to play with sound",
     items: [
-      { slug: "reel-01", tag: "Product · Extresy", alt: "Hand holding a jewelled Extresy perfume bottle, priced at Rs. 699 for three luxury perfumes" },
-      { slug: "reel-02", tag: "UGC · Skincare", alt: "Creator close-up reviewing an invisible pimple patch" },
+      { slug: "reel-01", tag: "AI UGC • Perfume", alt: "Hand holding a jewelled Extresy perfume bottle, priced at Rs. 699 for three luxury perfumes" },
+      { slug: "reel-02", tag: "AI UGC • Skincare", alt: "Creator close-up reviewing an invisible pimple patch" },
       { slug: "reel-03", tag: "AI story", alt: "AI-generated mythological king in a snack shop with a soundbox, captioned in Hindi" },
       { slug: "reel-04", tag: "AI story · Fintech", alt: "Worried woman reading a loan-rejected message, with a poor credit score gauge" },
       { slug: "reel-05", tag: "Motion", alt: "Animated snack pack on lime green: two million dollars in sales with TikTok Shop" },
@@ -167,7 +168,7 @@ export const showcase = {
     {
       slug: "campaign-03", client: "E-commerce brand", industry: "D2C", platform: "Shopify Analytics", type: "Store revenue",
       period: "1 Jan – 16 Nov 2026", metric: { value: "₹31.47 L", label: "Total sales" },
-      description: "5,087 orders with 5,045 fulfilled, at an average order value of ₹618.76.",
+      description: "5,087 fully prepaid orders, at an average order value of ₹618.76 — a perfume brand we scaled from 0 to ₹31.5 L in sales.",
       alt: "Shopify analytics dashboard: total sales ₹3,147,682, 5,087 orders, 5,045 fulfilled, average order value ₹618.76",
     },
     {
@@ -239,9 +240,9 @@ export const founder = {
   // Shown in this order. Photos live in static/img/founders/ (shown in black & white on the site).
   // focus = CSS object-position for the 4:5 crop. Only list people who are actually on the team.
   people: [
-    { name: "Shubham Jain", role: "Founder & Creative Director", photo: "founders/shubham-jain.webp", focus: "50% 30%", linkedin: null },
-    { name: "Krupa Jain", role: "AI Ads Head", photo: "founders/krupa-jain.jpg", focus: "50% 36%", linkedin: null },
-    { name: "Ashwin Pillai", role: "Performance Marketing Head", photo: "founders/ashwin-pillai.webp", focus: "50% 34%", linkedin: null },
+    { name: "Shubham Jain", role: "Co-Founder & Creative Director", photo: "founders/shubham-jain.webp", focus: "50% 30%", linkedin: null },
+    { name: "Ashwin Pillai", role: "Co-Founder & Head of Growth", photo: "founders/ashwin-pillai.webp", focus: "50% 34%", linkedin: null },
+    { name: "Krupa Jain", role: "Head of AI Ads", photo: "founders/krupa-jain.jpg", focus: "50% 36%", linkedin: null },
     { name: "Dhruv Agarwal", role: "Performance Marketer", photo: "founders/dhruv-agarwal.jpg", focus: "50% 50%", linkedin: null },
   ],
 };
@@ -357,4 +358,6 @@ export const contact = {
 
 export const footer = {
   cta: "Have an idea worth noticing?",
+  // Extra entries for the footer's Services column, listed after the services above.
+  extraServices: ["Performance Marketing & Scaling"],
 };
