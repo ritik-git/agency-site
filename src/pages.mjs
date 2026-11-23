@@ -151,6 +151,7 @@ export function Admin() {
   const leadOptions = JSON.stringify({
     revenue_current: toMap(F.revenueCurrent.options), revenue_target: toMap(F.revenueTarget.options),
     target_timeline: toMap(F.timeline.options), challenges: toMap(F.challenges.options),
+    budget_fit: toMap(F.budgetFit.options),
     service: { ...Object.fromEntries(C.services.items.map((x) => [x.slug, x.title])), "not-sure": "Not sure yet" },
   }).replace(/</g, "\\u003c");
   return Document({

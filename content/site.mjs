@@ -316,6 +316,16 @@ export const contact = {
         { value: "50l-plus", label: "₹50L+" },
       ],
     },
+    // Values are in supabase/migrations/003_budget_and_start.sql
+    budgetFit: {
+      question: "Our performance marketing service fees start at ₹30,000/month. Are you comfortable with this monthly investment?",
+      options: [
+        { value: "30k-ok", label: "Yes, ₹30,000/month works for me.", wide: true },
+        { value: "20k-30k", label: "My budget is between ₹20,000–₹30,000/month.", wide: true },
+        { value: "below-20k", label: "My budget is below ₹20,000/month.", wide: true },
+        { value: "discuss", label: "I'd like to discuss the pricing before proceeding.", wide: true },
+      ],
+    },
     revenueTarget: {
       question: "What's your target monthly revenue?",
       options: [
@@ -352,6 +362,11 @@ export const contact = {
       ],
       otherLabel: "Something else? (Optional)",
       otherPlaceholder: "Tell us briefly about your challenge...",
+      dropdownPlaceholder: "Select your challenges",
+    },
+    startReady: {
+      question: "If we're a good fit, are you ready to start within the next 2 weeks? (Optional)",
+      placeholder: "e.g. Yes / No / Maybe — tell us more if you like",
     },
   },
 };

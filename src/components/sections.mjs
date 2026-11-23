@@ -392,7 +392,9 @@ export function Contact() {
             ${field("f-company", html`Brand name ${req}`, html`<input id="f-company" name="company" type="text" autocomplete="organization" placeholder="Your brand" required maxlength="160" aria-describedby="f-company-error">`)}
           </div>`)}
 
-          ${Step(2, ChoiceGroup({ id: "q-revenue", name: "revenue_current", legend: q.revenueCurrent.question, options: q.revenueCurrent.options, required: true }))}
+          ${Step(2, html`
+            ${ChoiceGroup({ id: "q-revenue", name: "revenue_current", legend: q.revenueCurrent.question, options: q.revenueCurrent.options, required: true })}
+            ${ChoiceGroup({ id: "q-budget", name: "budget_fit", legend: q.budgetFit.question, options: q.budgetFit.options, required: true })}`)}
 
           ${Step(3, html`
             ${ChoiceGroup({ id: "q-target", name: "revenue_target", legend: q.revenueTarget.question, options: q.revenueTarget.options, required: true })}
@@ -400,13 +402,18 @@ export function Contact() {
 
           ${Step(4, html`${ChoiceGroup({
             id: "q-challenges", name: "challenges", type: "checkbox", legend: q.challenges.question, hint: q.challenges.hint,
-            options: q.challenges.options, required: true, layout: "list",
+            options: q.challenges.options, required: true, layout: "list", dropdown: q.challenges.dropdownPlaceholder,
             after: html`<div class="field choices__other" data-field>
               <label class="field__label" for="f-other">${q.challenges.otherLabel}</label>
               <textarea id="f-other" name="challenge_other" rows="2" maxlength="500" placeholder="${q.challenges.otherPlaceholder}" aria-describedby="f-other-error"></textarea>
               <p class="field__error" id="f-other-error" hidden>${icon("alert", 14)}<span></span></p>
             </div>`,
           })}
+          <div class="field choices__other" data-field>
+            <label class="field__label" for="f-start">${q.startReady.question}</label>
+            <textarea id="f-start" name="start_ready" rows="2" maxlength="500" placeholder="${q.startReady.placeholder}" aria-describedby="f-start-error"></textarea>
+            <p class="field__error" id="f-start-error" hidden>${icon("alert", 14)}<span></span></p>
+          </div>
           <div class="field field--check" data-field>
             <label class="check" for="f-consent">
               <input id="f-consent" name="consent" type="checkbox" required aria-describedby="f-consent-error">

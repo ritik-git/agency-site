@@ -60,7 +60,7 @@ async function mock(req, res, p, q) {
       recent.set(ip, [...ts, Date.now()]);
       // Mirrors schema.sql + migrations/002 (unknown columns → PostgREST's PGRST204, like the real API)
       const allowed = ["name", "email", "company", "website", "service", "budget", "message", "consent", "source_url",
-        "phone", "revenue_current", "revenue_target", "target_timeline", "challenges", "challenge_other"];
+        "phone", "revenue_current", "revenue_target", "target_timeline", "challenges", "challenge_other", "budget_fit", "start_ready"];
       const unknown = Object.keys(b).find((k) => !allowed.includes(k));
       if (unknown) return send(res, 400, { code: "PGRST204", message: `Could not find the '${unknown}' column of 'leads' in the schema cache` });
       if (b.phone != null && !/^\+?[0-9 ()\-.]{7,20}$/.test(b.phone)) return send(res, 400, { code: "23514", message: "new row violates check constraint" });

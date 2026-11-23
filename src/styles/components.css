@@ -161,6 +161,28 @@
   .choice:hover .choice__input:checked + .choice__body { border-color: var(--color-accent); }
 }
 .choices.is-invalid .choice__body { border-color: rgb(255 107 91 / .5); }
+
+/* Dropdown variant (ChoiceGroup `dropdown`): the options fold into a menu under a select-like trigger */
+.choices__dropdown { position: relative; }
+.choices__summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 12px 14px;
+  border: 1px solid var(--color-line-strong); background: rgb(245 245 241 / .02); cursor: pointer; list-style: none;
+  font-size: 15px; line-height: 1.35; color: var(--color-text-secondary); -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--dur-sm) var(--ease-out), color var(--dur-sm);
+}
+.choices__summary::-webkit-details-marker { display: none; }
+.choices__summary-text { min-width: 0; overflow-wrap: anywhere; }
+.choices__dropdown.has-value .choices__summary { color: var(--color-text-primary); border-color: var(--color-accent); }
+.choices__summary:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.choices__caret { flex-shrink: 0; transition: transform var(--dur-sm) var(--ease-out); }
+.choices__dropdown[open] .choices__caret { transform: rotate(180deg); }
+.choices__dropdown[open] .choices__summary { border-color: var(--grey-500); }
+.choices__grid--menu { grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: -1px; border: 1px solid var(--color-line-strong); background: var(--color-surface-2); }
+.choices__grid--menu .choice__body { min-height: 48px; border: 0; border-bottom: 1px solid var(--color-line); background: transparent; }
+.choices__grid--menu .choice:last-child .choice__body { border-bottom: 0; }
+.choices__grid--menu .choice__input:checked + .choice__body { box-shadow: none; border-color: var(--color-line); }
+.choices.is-invalid .choices__summary { border-color: rgb(255 107 91 / .5); }
+@media (hover: hover) and (pointer: fine) { .choices__summary:hover { border-color: var(--grey-500); color: var(--color-text-primary); } }
 .choices__error { margin-top: var(--space-3); }
 .choices__other { margin-top: var(--space-7); }
 .choices__other textarea { min-height: 88px; font-size: 16px; }

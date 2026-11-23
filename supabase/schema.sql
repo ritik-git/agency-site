@@ -50,7 +50,10 @@ create table if not exists public.leads (
   revenue_target  text check (revenue_target is null or revenue_target in ('1l-5l','5l-10l','10l-25l','25l-50l','50l-1cr','1cr-plus')),
   target_timeline text check (target_timeline is null or target_timeline in ('3m','6m','9m','12m','flexible')),
   challenges      text[] check (challenges is null or (cardinality(challenges) <= 8 and challenges <@ array['leads','conversion','scaling','awareness','profitable-ads','website','retention','not-sure']::text[])),
-  challenge_other text check (challenge_other is null or char_length(challenge_other) <= 500)
+  challenge_other text check (challenge_other is null or char_length(challenge_other) <= 500),
+  -- added to existing databases by migrations/003_budget_and_start.sql
+  budget_fit      text check (budget_fit is null or budget_fit in ('30k-ok','20k-30k','below-20k','discuss')),
+  start_ready     text check (start_ready is null or char_length(start_ready) <= 500)
 );
 create index if not exists leads_created_at_idx on public.leads (created_at desc);
 create index if not exists leads_ip_recent_idx  on public.leads (ip_hash, created_at desc);
@@ -60,7 +63,8 @@ alter table public.leads enable row level security;
 -- Column-level privileges: the public can only write the form fields.
 revoke all on public.leads from anon, authenticated;
 grant insert (name, email, company, website, service, budget, message, consent, source_url,
-              phone, revenue_current, revenue_target, target_timeline, challenges, challenge_other) on public.leads to anon;
+              phone, revenue_current, revenue_target, target_timeline, challenges, challenge_other,
+              budget_fit, start_ready) on public.leads to anon;
 grant select on public.leads to authenticated;
 grant update (status, notes) on public.leads to authenticated;
 

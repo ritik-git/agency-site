@@ -89,7 +89,7 @@ with sync_playwright() as p:
     pg.click(F + "[data-prev]"); pg.wait_for_timeout(300)
     check("Back returns to step 3", pg.evaluate(visible_step) == 2)
     pg.click(".stepper__item >> nth=3"); pg.wait_for_timeout(300)
-    pg.click("#q-challenges .choice >> text=Scaling revenue"); pg.click("#q-challenges .choice >> text=Running profitable ads")
+    pg.click("#q-challenges summary"); pg.click("#q-challenges .choice >> text=Scaling revenue"); pg.click("#q-challenges .choice >> text=Running profitable ads")
     check("single + multi select", pg.evaluate("document.querySelectorAll('input[name=revenue_current]:checked').length") == 1
           and pg.evaluate("document.querySelectorAll('input[name=challenges]:checked').length") == 2)
     pg.fill("#f-other", "We need 30 UGC ads for a skincare launch in December.")

@@ -55,17 +55,23 @@ export function SectionHeader({ id, index, label, title, accentFrom, aside, cls 
  *        three from 480px; "list": longer labels, one column on phones, two from 480px
  * @param {*} [o.after]        extra markup inside the fieldset, after the options (e.g. an "other" field)
  */
-export function ChoiceGroup({ id, name, legend, options, type = "radio", required = false, hint = "", layout = "2", after = "" }) {
+export function ChoiceGroup({ id, name, legend, options, type = "radio", required = false, hint = "", layout = "2", after = "", dropdown = "" }) {
   const mark = type === "checkbox" ? icon("check", 12, "icon choice__check") : "";
-  return html`<fieldset class="choices" id="${id}" data-choices="${name}" ${required ? raw("data-required") : ""} aria-describedby="${hint ? `${id}-hint ` : ""}${id}-error">
-    <legend class="choices__legend">${legend}${required ? html` <span class="req" aria-hidden="true">*</span>` : ""}</legend>
-    ${hint ? html`<p class="choices__hint" id="${id}-hint">${hint}</p>` : ""}
-    <div class="choices__grid choices__grid--${layout}">
+  const grid = html`<div class="choices__grid choices__grid--${dropdown ? "menu" : layout}">
       ${options.map((o) => html`<label class="choice${o.wide ? " choice--wide" : ""}">
         <input class="choice__input" type="${type}" name="${name}" value="${o.value}">
         <span class="choice__body"><span class="choice__mark choice__mark--${type}" aria-hidden="true">${mark}</span><span class="choice__text">${o.label}</span></span>
       </label>`)}
-    </div>
+    </div>`;
+  return html`<fieldset class="choices" id="${id}" data-choices="${name}" ${required ? raw("data-required") : ""} aria-describedby="${hint ? `${id}-hint ` : ""}${id}-error">
+    <legend class="choices__legend">${legend}${required ? html` <span class="req" aria-hidden="true">*</span>` : ""}</legend>
+    ${hint ? html`<p class="choices__hint" id="${id}-hint">${hint}</p>` : ""}
+    ${dropdown
+      ? html`<details class="choices__dropdown" data-dropdown>
+        <summary class="choices__summary"><span class="choices__summary-text" data-dropdown-label data-placeholder="${dropdown}">${dropdown}</span>${icon("chevron", 18, "icon choices__caret")}</summary>
+        ${grid}
+      </details>`
+      : grid}
     ${after}
     <p class="field__error choices__error" id="${id}-error" hidden>${icon("alert", 14)}<span></span></p>
   </fieldset>`;

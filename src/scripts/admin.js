@@ -182,11 +182,12 @@ function openDrawer(id, trigger) {
   if (isConsultation(l)) {
     const ch = challengeLabels(l);
     groups.push(
-      group("02", "Today", dl([["Revenue now", lbl("revenue_current", l.revenue_current)]])),
+      group("02", "Today", dl([["Revenue now", lbl("revenue_current", l.revenue_current)], l.budget_fit ? ["Budget fit", lbl("budget_fit", l.budget_fit)] : null])),
       group("03", "Goal", dl([["Target", lbl("revenue_target", l.revenue_target)], ["Timeline", lbl("target_timeline", l.target_timeline)]])),
       group("04", "Challenges", el("div", {},
         ch.length ? el("div", { class: "admin-chips admin-chips--wrap" }, ch.map((c) => chip(c))) : el("p", { class: "drawer__muted", textContent: "None selected" }),
-        l.challenge_other ? el("blockquote", { class: "drawer__other" }, el("span", { class: "drawer__other-label", textContent: "Something else" }), el("p", { textContent: l.challenge_other })) : null)),
+        l.challenge_other ? el("blockquote", { class: "drawer__other" }, el("span", { class: "drawer__other-label", textContent: "Something else" }), el("p", { textContent: l.challenge_other })) : null,
+        l.start_ready ? el("blockquote", { class: "drawer__other" }, el("span", { class: "drawer__other-label", textContent: "Ready to start within 2 weeks?" }), el("p", { textContent: l.start_ready })) : null)),
     );
   } else {
     groups.push(group("02", "Project", dl([["Budget", l.budget]])));
@@ -244,10 +245,10 @@ $("[data-d-save]").addEventListener("click", async (e) => {
 $("[data-refresh]").addEventListener("click", load);
 $("[data-export]").addEventListener("click", () => {
   const cols = ["created_at", "name", "email", "phone", "company", "website", "service", "budget",
-    "revenue_current", "revenue_target", "target_timeline", "challenges", "challenge_other", "status", "message", "notes"];
+    "revenue_current", "revenue_target", "target_timeline", "challenges", "challenge_other", "budget_fit", "start_ready", "status", "message", "notes"];
   const value = (l, c) =>
     c === "challenges" ? challengeList(l)
-    : ["revenue_current", "revenue_target", "target_timeline"].includes(c) ? lbl(c, l[c])
+    : ["revenue_current", "revenue_target", "target_timeline", "budget_fit"].includes(c) ? lbl(c, l[c])
     : l[c];
   // Prefix cells starting with = + - @ to prevent CSV formula injection in Excel/Sheets
   const cell = (v) => { let s = v == null ? "" : String(v); if (/^[=+\-@]/.test(s)) s = "'" + s; return `"${s.replace(/"/g, '""')}"`; };

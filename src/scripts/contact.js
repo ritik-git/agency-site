@@ -10,6 +10,7 @@ const MESSAGES = {
   company: "Please add your brand name.",
   consent: "Please accept the privacy policy so we can get in touch.",
   revenue_current: "Please pick your current monthly revenue — a rough range is fine.",
+  budget_fit: "Please pick the option that fits your budget.",
   revenue_target: "Please pick a target — a rough idea is fine.",
   target_timeline: "Please choose a timeline (“Flexible” works too).",
   challenges: "Please pick at least one challenge, or describe it in your own words below.",
@@ -93,6 +94,8 @@ export function initContactForm() {
     return firstBad;
   };
   const focusBad = (el) => {
+    const dd = el.closest("[data-dropdown]");
+    if (dd) { dd.open = true; el = $("summary", dd); }
     el.closest("[data-field], [data-choices]").scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "center" });
     el.focus({ preventScroll: true });
   };
@@ -188,6 +191,19 @@ export function initContactForm() {
       updateSteps();
     });
   });
+  // Dropdown groups: the trigger shows what's picked
+  $$("[data-dropdown]", form).forEach((dd) => {
+    const lab = $("[data-dropdown-label]", dd);
+    const paint = () => {
+      const picked = $$("input:checked", dd).map((i) => $(".choice__text", i.closest(".choice")).textContent.trim());
+      lab.textContent = picked.length ? picked.join(", ") : lab.dataset.placeholder;
+      dd.classList.toggle("has-value", picked.length > 0);
+    };
+    dd.addEventListener("change", paint);
+    document.addEventListener("click", (e) => { if (dd.open && !dd.contains(e.target)) dd.open = false; });
+    dd.addEventListener("keydown", (e) => { if (e.key === "Escape" && dd.open) { dd.open = false; $("summary", dd).focus(); } });
+    paint();
+  });
   groups.forEach((g) => g.addEventListener("change", () => { if (g.classList.contains("is-invalid")) setGroupState(g, groupOk(g)); updateSteps(); }));
   other?.addEventListener("input", () => {
     const g = other.closest("[data-choices]");
@@ -232,16 +248,19 @@ export function initContactForm() {
     // Map answers → payload. Labels come from the cards themselves, so the summary matches what the visitor saw.
     const label = (input) => input ? $(".choice__text", input.closest(".choice")).textContent.trim() : "";
     const pick = (name) => $(`input[name="${name}"]:checked`, form);
-    const cur = pick("revenue_current"), tgt = pick("revenue_target"), when = pick("target_timeline");
+    const cur = pick("revenue_current"), fit = pick("budget_fit"), tgt = pick("revenue_target"), when = pick("target_timeline");
     const challenges = $$('input[name="challenges"]:checked', form);
     const otherText = (data.challenge_other || "").trim();
+    const startText = (data.start_ready || "").trim();
     const phone = data.phone.trim();
     const summary = [
       `Phone: ${phone}`,
       `Current monthly revenue: ${label(cur)}`,
+      `Budget (fees from ₹30,000/month): ${label(fit)}`,
       `Target monthly revenue: ${label(tgt)} (timeline: ${label(when)})`,
       `Challenges: ${challenges.map(label).join("; ") || "—"}`,
       otherText && `Something else: ${otherText}`,
+      startText && `Ready to start within 2 weeks: ${startText}`,
     ].filter(Boolean).join("\n").slice(0, 1000);
 
     // Columns every version of the database has (supabase/schema.sql)…
@@ -266,6 +285,8 @@ export function initContactForm() {
       challenges: challenges.map((c) => c.value),
       challenge_other: otherText || null,
     };
+    // …plus budget fit and start timing (supabase/migrations/003_budget_and_start.sql).
+    const latest = { ...full, budget_fit: fit.value, start_ready: startText || null };
 
     submit.setAttribute("aria-busy", "true");
     submit.disabled = true;
@@ -273,13 +294,10 @@ export function initContactForm() {
     const original = btnLabel.textContent;
     btnLabel.innerHTML = 'Sending<span class="dots" aria-hidden="true"></span>';
     try {
-      try {
-        await insertLead(full);
-      } catch (err) {
-        // Database without the new columns yet → store everything via the original columns instead.
-        const code = err.body?.code;
-        if (code === "PGRST204" || code === "42501" || code === "42703") await insertLead(base);
-        else throw err;
+      // Database missing newer columns → retry with fewer; the summary in `message` always has every answer.
+      const missingColumn = (err) => ["PGRST204", "42501", "42703"].includes(err.body?.code);
+      for (const [i, row] of [latest, full, base].entries()) {
+        try { await insertLead(row); break; } catch (err) { if (i === 2 || !missingColumn(err)) throw err; }
       }
       done();
     } catch (err) {
