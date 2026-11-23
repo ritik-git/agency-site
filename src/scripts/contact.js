@@ -207,7 +207,7 @@ export function initContactForm() {
   });
   groups.forEach((g) => g.addEventListener("change", () => { if (g.classList.contains("is-invalid")) setGroupState(g, groupOk(g)); updateSteps(); }));
   other?.addEventListener("input", () => {
-    const g = other.closest("[data-choices]");
+    const g = $('[data-choices="challenges"]', form);
     if (g.classList.contains("is-invalid")) setGroupState(g, groupOk(g));
     updateSteps();
   });

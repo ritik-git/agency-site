@@ -403,16 +403,16 @@ export function Contact() {
           ${Step(4, html`${ChoiceGroup({
             id: "q-challenges", name: "challenges", type: "checkbox", legend: q.challenges.question, hint: q.challenges.hint,
             options: q.challenges.options, required: true, layout: "list", dropdown: q.challenges.dropdownPlaceholder,
-            after: html`<div class="field choices__other" data-field>
-              <label class="field__label" for="f-other">${q.challenges.otherLabel}</label>
-              <textarea id="f-other" name="challenge_other" rows="2" maxlength="500" placeholder="${q.challenges.otherPlaceholder}" aria-describedby="f-other-error"></textarea>
-              <p class="field__error" id="f-other-error" hidden>${icon("alert", 14)}<span></span></p>
-            </div>`,
           })}
           <div class="field choices__other field--question" data-field>
             <label class="choices__legend" for="f-start">${q.startReady.question} ${req}</label>
             <textarea id="f-start" name="start_ready" rows="2" maxlength="500" required placeholder="${q.startReady.placeholder}" aria-describedby="f-start-error"></textarea>
             <p class="field__error" id="f-start-error" hidden>${icon("alert", 14)}<span></span></p>
+          </div>
+          <div class="field choices__other" data-field>
+            <label class="field__label" for="f-other">${q.challenges.otherLabel}</label>
+            <textarea id="f-other" name="challenge_other" rows="2" maxlength="500" placeholder="${q.challenges.otherPlaceholder}" aria-describedby="f-other-error"></textarea>
+            <p class="field__error" id="f-other-error" hidden>${icon("alert", 14)}<span></span></p>
           </div>
           <div class="field field--check" data-field>
             <label class="check" for="f-consent">
