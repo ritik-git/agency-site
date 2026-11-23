@@ -409,8 +409,8 @@ export function Contact() {
               <p class="field__error" id="f-other-error" hidden>${icon("alert", 14)}<span></span></p>
             </div>`,
           })}
-          <div class="field choices__other" data-field>
-            <label class="field__label" for="f-start">${q.startReady.question} ${req}</label>
+          <div class="field choices__other field--question" data-field>
+            <label class="choices__legend" for="f-start">${q.startReady.question} ${req}</label>
             <textarea id="f-start" name="start_ready" rows="2" maxlength="500" required placeholder="${q.startReady.placeholder}" aria-describedby="f-start-error"></textarea>
             <p class="field__error" id="f-start-error" hidden>${icon("alert", 14)}<span></span></p>
           </div>
