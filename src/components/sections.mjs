@@ -410,8 +410,8 @@ export function Contact() {
             </div>`,
           })}
           <div class="field choices__other" data-field>
-            <label class="field__label" for="f-start">${q.startReady.question}</label>
-            <textarea id="f-start" name="start_ready" rows="2" maxlength="500" placeholder="${q.startReady.placeholder}" aria-describedby="f-start-error"></textarea>
+            <label class="field__label" for="f-start">${q.startReady.question} ${req}</label>
+            <textarea id="f-start" name="start_ready" rows="2" maxlength="500" required placeholder="${q.startReady.placeholder}" aria-describedby="f-start-error"></textarea>
             <p class="field__error" id="f-start-error" hidden>${icon("alert", 14)}<span></span></p>
           </div>
           <div class="field field--check" data-field>

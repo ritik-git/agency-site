@@ -13,6 +13,7 @@ const MESSAGES = {
   budget_fit: "Please pick the option that fits your budget.",
   revenue_target: "Please pick a target — a rough idea is fine.",
   target_timeline: "Please choose a timeline (“Flexible” works too).",
+  start_ready: "Please let us know — a quick yes, no or maybe is fine.",
   challenges: "Please pick at least one challenge, or describe it in your own words below.",
 };
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -46,7 +47,7 @@ const checkedIn = (group) => $$("input:checked", group);
 export function initContactForm() {
   const form = $("[data-contact-form]");
   if (!form) return;
-  const inputs = $$("input[required]:not([type=radio]):not([type=checkbox]), input[name=consent]", form);
+  const inputs = $$("input[required]:not([type=radio]):not([type=checkbox]), textarea[required], input[name=consent]", form);
   const groups = $$("[data-choices]", form);
   const other = $("#f-other", form);
   const steps = $$("[data-form-step]", form);
@@ -67,7 +68,7 @@ export function initContactForm() {
 
   // Step ticks: a step is complete when everything required inside it is valid.
   const stepComplete = (step) =>
-    $$("input[required]:not([type=radio]):not([type=checkbox])", step).every(validateInput) &&
+    $$("input[required]:not([type=radio]):not([type=checkbox]), textarea[required]", step).every(validateInput) &&
     $$("[data-choices]", step).every((g) => groupOk(g) && (checkedIn(g).length > 0 || g.dataset.choices === "challenges"));
   const updateSteps = () => {
     steps.forEach((s) => {
@@ -82,7 +83,7 @@ export function initContactForm() {
   // Validate everything inside `root` (a step, or the whole form); returns the first invalid control.
   const validateScope = (root) => {
     let firstBad = null;
-    $$("input[required]:not([type=radio]):not([type=checkbox]), [data-choices], input[name=consent]", root).forEach((node) => {
+    $$("input[required]:not([type=radio]):not([type=checkbox]), textarea[required], [data-choices], input[name=consent]", root).forEach((node) => {
       if (node.matches("[data-choices]")) {
         const ok = groupOk(node); setGroupState(node, ok);
         if (!ok && !firstBad) firstBad = $("input", node);

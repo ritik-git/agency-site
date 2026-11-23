@@ -365,7 +365,7 @@ export const contact = {
       dropdownPlaceholder: "Select your challenges",
     },
     startReady: {
-      question: "If we're a good fit, are you ready to start within the next 2 weeks? (Optional)",
+      question: "If we're a good fit, are you ready to start within the next 2 weeks?",
       placeholder: "e.g. Yes / No / Maybe — tell us more if you like",
     },
   },
